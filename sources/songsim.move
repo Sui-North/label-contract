@@ -17,6 +17,7 @@ use songsim::registry::{Self, TaskRegistry};
 use songsim::reputation::{Self, Reputation};
 use songsim::task::{Self, Task, Submission};
 use songsim::consensus::{ConsensusResult, PayoutBatch};
+use songsim::migration::{Self, MigrationState};
 
 // === Platform Core Structs ===
 
@@ -28,6 +29,7 @@ public struct AdminCap has key {
 /// Platform configuration (shared object)
 public struct PlatformConfig has key {
     id: UID,
+    version: u64, // Schema version for migrations
     fee_bps: u64, // Platform fee in basis points (1 bps = 0.01%)
     fee_recipient: address, // Address receiving platform fees
     min_bounty: u64, // Minimum task bounty
@@ -49,6 +51,7 @@ fun init(ctx: &mut TxContext) {
     // Create and share PlatformConfig
     let config = PlatformConfig {
         id: object::new(ctx),
+        version: migration::current_version(),
         fee_bps: constants::default_platform_fee_bps(),
         fee_recipient: ctx.sender(),
         min_bounty: constants::min_bounty(),
@@ -60,6 +63,9 @@ fun init(ctx: &mut TxContext) {
 
     // Create and share TaskRegistry
     registry::create_and_share(ctx);
+
+    // Create and share MigrationState
+    migration::create_and_share(ctx);
 }
 
 // === Admin Functions ===
@@ -122,6 +128,34 @@ public fun admin_distribute_prize_pool(
     ctx: &mut TxContext,
 ) {
     prize_pool::distribute(pool, winners, clock, ctx);
+}
+
+// === Migration Management (AdminCap required) ===
+
+/// Begin platform migration - locks platform during upgrade
+public fun begin_platform_migration(
+    _: &AdminCap,
+    migration_state: &mut MigrationState,
+    clock: &Clock,
+) {
+    migration::begin_migration(migration_state, clock);
+}
+
+/// Complete platform migration - unlocks with new version
+public fun complete_platform_migration(
+    _: &AdminCap,
+    migration_state: &mut MigrationState,
+    new_version: u64,
+) {
+    migration::complete_migration(migration_state, new_version);
+}
+
+/// Rollback failed migration
+public fun rollback_platform_migration(
+    _: &AdminCap,
+    migration_state: &mut MigrationState,
+) {
+    migration::rollback_migration(migration_state);
 }
 
 // === Profile Management ===

@@ -1,8 +1,11 @@
 [package]
 name = "songsim"
-edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
-# license = ""           # e.g., "MIT", "GPL", "Apache 2.0"
-# authors = ["..."]      # e.g., ["Joe Smith (joesmith@noemail.com)", "John Snow (johnsnow@noemail.com)"]
+version = "1.0.0"
+edition = "2024.beta"
+license = "MIT"
+authors = ["Songsim Core Team"]
+
+published-at = "0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8"
 
 [dependencies]
 

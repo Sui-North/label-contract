@@ -1,0 +1,377 @@
+[warning] Client/Server api version mismatch, client api version : 1.58.1, server api version : 1.61.0
+[warning] CLI's protocol version is 98, but the active network's protocol version is 102. 
+ Consider installing the latest version of the CLI - https://docs.sui.io/guides/developer/getting-started/sui-install 
+
+ If publishing/upgrading returns a dependency verification error, then install the latest CLI version.
+[Warning]: Dependency sources are no longer verified automatically during publication and upgrade, so the `--skip-dependency-verification` flag is no longer necessary.
+[warning]: The network is using protocol version ProtocolVersion(98), but this binary only recognizes protocol version ProtocolVersion(102); the system packages used for compilation (e.g. MoveStdlib) may be out of date. If you have errors related to system packages, you may need to update your CLI.
+INCLUDING DEPENDENCY Bridge
+INCLUDING DEPENDENCY SuiSystem
+INCLUDING DEPENDENCY Sui
+INCLUDING DEPENDENCY MoveStdlib
+BUILDING songsim
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\access_policy.move:7:14
+  [0m[36m│[0m
+[0m[36m7[0m [0m[36m│[0m use songsim::[0m[33mconstants[0m;
+  [0m[36m│[0m              [0m[33m^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'constants'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\access_policy.move:10:7
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m const [0m[33mENotAuthorized[0m: u64 = 1;
+   [0m[36m│[0m       [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'ENotAuthorized' is never used. Consider removing it.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\access_policy.move:11:7
+   [0m[36m│[0m
+[0m[36m11[0m [0m[36m│[0m const [0m[33mETaskNotFound[0m: u64 = 2;
+   [0m[36m│[0m       [0m[33m^^^^^^^^^^^^^[0m [0m[33mThe constant 'ETaskNotFound' is never used. Consider removing it.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\access_policy.move:12:7
+   [0m[36m│[0m
+[0m[36m12[0m [0m[36m│[0m const [0m[33mESubmissionNotFound[0m: u64 = 3;
+   [0m[36m│[0m       [0m[33m^^^^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'ESubmissionNotFound' is never used. Consider removing it.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\consensus.move:6:23
+  [0m[36m│[0m
+[0m[36m6[0m [0m[36m│[0m use sui::coin::{Self, [0m[33mCoin[0m};
+  [0m[36m│[0m                       [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'Coin'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\consensus.move:7:15
+  [0m[36m│[0m
+[0m[36m7[0m [0m[36m│[0m use sui::sui::[0m[33mSUI[0m;
+  [0m[36m│[0m               [0m[33m^^^[0m [0m[33mUnused 'use' of alias 'SUI'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\quality.move:95:5
+   [0m[36m│[0m
+[0m[36m95[0m [0m[36m│[0m     [0m[33mctx[0m: &TxContext,
+   [0m[36m│[0m     [0m[33m^^^[0m [0m[33mUnused parameter 'ctx'. Consider removing or prefixing with an underscore: '_ctx'[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\emergency.move:65:69
+   [0m[36m│[0m
+[0m[36m65[0m [0m[36m│[0m     events::emit_emergency_pause_activated(subsystem, *std::string::[0m[33mbytes[0m(&reason), paused_at);
+   [0m[36m│[0m                                                                     [0m[33m^^^^^[0m [0m[33mThe function 'std::string::bytes' is deprecated: Use `std::string::as_bytes` instead.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\reputation.move:23:5
+   [0m[36m│[0m
+[0m[36m23[0m [0m[36m│[0m     [0m[33mbadge_id[0m: u8,
+   [0m[36m│[0m     [0m[33m^^^^^^^^[0m [0m[33mThe 'badge_id' field of the 'Badge' type is unused[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\reputation.move:24:5
+   [0m[36m│[0m
+[0m[36m24[0m [0m[36m│[0m     [0m[33mname[0m: vector<u8>,
+   [0m[36m│[0m     [0m[33m^^^^[0m [0m[33mThe 'name' field of the 'Badge' type is unused[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\reputation.move:25:5
+   [0m[36m│[0m
+[0m[36m25[0m [0m[36m│[0m     [0m[33mdescription[0m: vector<u8>,
+   [0m[36m│[0m     [0m[33m^^^^^^^^^^^[0m [0m[33mThe 'description' field of the 'Badge' type is unused[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\reputation.move:26:5
+   [0m[36m│[0m
+[0m[36m26[0m [0m[36m│[0m     [0m[33mearned_at[0m: u64,
+   [0m[36m│[0m     [0m[33m^^^^^^^^^[0m [0m[33mThe 'earned_at' field of the 'Badge' type is unused[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\songsim.move:19:26
+   [0m[36m│[0m
+[0m[36m19[0m [0m[36m│[0m use songsim::consensus::{[0m[33mConsensusResult[0m, PayoutBatch};
+   [0m[36m│[0m                          [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'ConsensusResult'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99000][0m[1m: possible owned object share[0m
+    [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\songsim.move:273:5
+    [0m[36m│[0m
+[0m[36m273[0m [0m[36m│[0m     [0m[33mtransfer::public_share_object(new_task)[0m;
+    [0m[36m│[0m     [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m     [0m[33m│[0m                             [0m[36m│[0m
+    [0m[36m│[0m     [0m[33m│[0m                             [0m[36mCreating a fresh object and sharing it within the same function will ensure this does not abort.[0m
+    [0m[36m│[0m     [0m[33mPotential abort from a (potentially) owned object created by a different transaction.[0m
+    [0m[36m│[0m
+    [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\task.move:15:29
+    [0m[36m│[0m
+[0m[36m 15[0m [0m[36m│[0m public struct Task has key, store {
+    [0m[36m│[0m                             [0m[36m-----[0m [0m[36mPotentially an owned object because 'store' grants access to public transfers[0m
+    [0m[36m·[0m
+[0m[36m 69[0m [0m[36m│[0m ): Task {
+    [0m[36m│[0m    [0m[36m----[0m [0m[36mA potentially owned object coming from here[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(lint(share_owned))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99000][0m[1m: possible owned object share[0m
+    [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\songsim.move:467:5
+    [0m[36m│[0m
+[0m[36m467[0m [0m[36m│[0m     [0m[33mtransfer::public_share_object(new_dispute)[0m;
+    [0m[36m│[0m     [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m     [0m[33m│[0m                             [0m[36m│[0m
+    [0m[36m│[0m     [0m[33m│[0m                             [0m[36mCreating a fresh object and sharing it within the same function will ensure this does not abort.[0m
+    [0m[36m│[0m     [0m[33mPotential abort from a (potentially) owned object created by a different transaction.[0m
+    [0m[36m│[0m
+    [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\dispute.move:11:32
+    [0m[36m│[0m
+[0m[36m 11[0m [0m[36m│[0m public struct Dispute has key, store {
+    [0m[36m│[0m                                [0m[36m-----[0m [0m[36mPotentially an owned object because 'store' grants access to public transfers[0m
+    [0m[36m·[0m
+[0m[36m 37[0m [0m[36m│[0m ): Dispute {
+    [0m[36m│[0m    [0m[36m-------[0m [0m[36mA potentially owned object coming from here[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(lint(share_owned))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99000][0m[1m: possible owned object share[0m
+    [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\songsim.move:504:5
+    [0m[36m│[0m
+[0m[36m504[0m [0m[36m│[0m     [0m[33mtransfer::public_share_object(new_pool)[0m;
+    [0m[36m│[0m     [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m     [0m[33m│[0m                             [0m[36m│[0m
+    [0m[36m│[0m     [0m[33m│[0m                             [0m[36mCreating a fresh object and sharing it within the same function will ensure this does not abort.[0m
+    [0m[36m│[0m     [0m[33mPotential abort from a (potentially) owned object created by a different transaction.[0m
+    [0m[36m│[0m
+    [0m[36m┌─[0m \\?\C:\Users\yussif\Desktop\sui-label\songsim\sources\prize_pool.move:14:34
+    [0m[36m│[0m
+[0m[36m 14[0m [0m[36m│[0m public struct PrizePool has key, store {
+    [0m[36m│[0m                                  [0m[36m-----[0m [0m[36mPotentially an owned object because 'store' grants access to public transfers[0m
+    [0m[36m·[0m
+[0m[36m 42[0m [0m[36m│[0m ): PrizePool {
+    [0m[36m│[0m    [0m[36m---------[0m [0m[36mA potentially owned object coming from here[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(lint(share_owned))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+Please report feedback on the linter warnings at https://forums.sui.io
+
+Total number of linter warnings suppressed: 5 (unique lints: 1)
+Skipping dependency verification
+Transaction Digest: 6XB51ZrBCQu1LBPfnhfsTvNmL2xjpM95MCfd8Bk7RKE3
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Transaction Data                                                                                             │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                   │
+│ Gas Owner: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                │
+│ Gas Budget: 500000000 MIST                                                                                   │
+│ Gas Price: 1000 MIST                                                                                         │
+│ Gas Payment:                                                                                                 │
+│  ┌──                                                                                                         │
+│  │ ID: 0xf1a8c28b9e6eaeb0836a770d6e42e8d8c85f0c3ff5800541904969e75273848e                                    │
+│  │ Version: 653454472                                                                                        │
+│  │ Digest: 5XovSMaXDhdpNTWkfbRrDKmFJtxKXoKCPTf1uTfjyZ6x                                                      │
+│  └──                                                                                                         │
+│                                                                                                              │
+│ Transaction Kind: Programmable                                                                               │
+│ ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│ │ Input Objects                                                                                            │ │
+│ ├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ 0   Pure Arg: Type: address, Value: "0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8" │ │
+│ ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
+│ ╭─────────────────────────────────────────────────────────────────────────╮                                  │
+│ │ Commands                                                                │                                  │
+│ ├─────────────────────────────────────────────────────────────────────────┤                                  │
+│ │ 0  Publish:                                                             │                                  │
+│ │  ┌                                                                      │                                  │
+│ │  │ Dependencies:                                                        │                                  │
+│ │  │   0x0000000000000000000000000000000000000000000000000000000000000001 │                                  │
+│ │  │   0x0000000000000000000000000000000000000000000000000000000000000002 │                                  │
+│ │  └                                                                      │                                  │
+│ │                                                                         │                                  │
+│ │ 1  TransferObjects:                                                     │                                  │
+│ │  ┌                                                                      │                                  │
+│ │  │ Arguments:                                                           │                                  │
+│ │  │   Result 0                                                           │                                  │
+│ │  │ Address: Input  0                                                    │                                  │
+│ │  └                                                                      │                                  │
+│ ╰─────────────────────────────────────────────────────────────────────────╯                                  │
+│                                                                                                              │
+│ Signatures:                                                                                                  │
+│    zlH8dNc+Z+jFNH7oKkkQ3EESQQUIhIetbFoOaxj0MKEJzlNPRZTuYiE/uLul/Ynz8DKl/8rPFp/5rgTcUAkXDA==                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Transaction Effects                                                                               │
+├───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Digest: 6XB51ZrBCQu1LBPfnhfsTvNmL2xjpM95MCfd8Bk7RKE3                                              │
+│ Status: Success                                                                                   │
+│ Executed Epoch: 924                                                                               │
+│                                                                                                   │
+│ Created Objects:                                                                                  │
+│  ┌──                                                                                              │
+│  │ ID: 0x1c181ed3f4a5a9a332c8c2ae0306ada73f8e56d3eb8ffb2afc55dd0a2cfa2023                         │
+│  │ Owner: Shared( 653454473 )                                                                     │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: 3ibYwkXyeGBSzjtCvR3Vv3ep55R2KEbdK21cW31wE4bf                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8                         │
+│  │ Owner: Immutable                                                                               │
+│  │ Version: 1                                                                                     │
+│  │ Digest: 7rQyK4afoxTxkFPYniYGeHGqut8CydTkYmQiHpZoPPmP                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x2db2475337d66afcfe925a697c8c0c81d228be565ec7801521511079f07f3b3d                         │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )  │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: B3Pvu2XMp1A47S3Co5KmFrJSjVMg13vdqS6zVKGAGwrf                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x410233b39bacb5aee8f88d4d178d34863e39c2e9fa9084078649fed26ff8bd3a                         │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )  │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: 9QTmQ5HQxJwtZehq4PHLckqxyawoNN2s9K92XQCbLkPH                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x5fdb75cc0dced543a570639c70318f9ae601682f9b80443a52fe02607d04c6f5                         │
+│  │ Owner: Shared( 653454473 )                                                                     │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: By8AtA5eUHUVManSs5ch3AqzS1dmFFf6ejEz4j2zDz7C                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x7eab83c5ed2db60be655bcf5d7d09b21586df6377159efd563752a6d2ccdf3d7                         │
+│  │ Owner: Shared( 653454473 )                                                                     │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: AGyvBWnFLmYdNDGviCRZTrk5DVujiHLpf5Ps45Db5yLa                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x9ffee877806babd61c47fef5a034cdf74e9ff1878dae50f878fc742290803acb                         │
+│  │ Owner: Shared( 653454473 )                                                                     │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: CP6XFDPKfNeNTHDfiPzvB73aGmQkkfi2c1kRxQcw7guJ                                           │
+│  └──                                                                                              │
+│ Mutated Objects:                                                                                  │
+│  ┌──                                                                                              │
+│  │ ID: 0xf1a8c28b9e6eaeb0836a770d6e42e8d8c85f0c3ff5800541904969e75273848e                         │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )  │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: 6DwbPQTXP6TGsRGTDVbbznKc1bNZHzjyDgFiUkM4kgLe                                           │
+│  └──                                                                                              │
+│ Gas Object:                                                                                       │
+│  ┌──                                                                                              │
+│  │ ID: 0xf1a8c28b9e6eaeb0836a770d6e42e8d8c85f0c3ff5800541904969e75273848e                         │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )  │
+│  │ Version: 653454473                                                                             │
+│  │ Digest: 6DwbPQTXP6TGsRGTDVbbznKc1bNZHzjyDgFiUkM4kgLe                                           │
+│  └──                                                                                              │
+│ Gas Cost Summary:                                                                                 │
+│    Storage Cost: 305694800 MIST                                                                   │
+│    Computation Cost: 3000000 MIST                                                                 │
+│    Storage Rebate: 978120 MIST                                                                    │
+│    Non-refundable Storage Fee: 9880 MIST                                                          │
+│                                                                                                   │
+│ Transaction Dependencies:                                                                         │
+│    5gQLd7S4n5cqT4yPDRExVEU7Ta9sw8LvtaKjhCJRuLpk                                                   │
+│    9D3Ypemh6DadH4weuCeYPjXD2nGsPpb5L8cNteZcUFyA                                                   │
+│    Dd9pn1zFcSJjinxQewFd2gQdR4XKsHxFioD5MYnwLZQz                                                   │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────╮
+│ No transaction block events │
+╰─────────────────────────────╯
+
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Object Changes                                                                                                                                                     │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Created Objects:                                                                                                                                                   │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0x1c181ed3f4a5a9a332c8c2ae0306ada73f8e56d3eb8ffb2afc55dd0a2cfa2023                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Shared( 653454473 )                                                                                                                                      │
+│  │ ObjectType: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8::registry::TaskRegistry                                                          │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: 3ibYwkXyeGBSzjtCvR3Vv3ep55R2KEbdK21cW31wE4bf                                                                                                            │
+│  └──                                                                                                                                                               │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0x2db2475337d66afcfe925a697c8c0c81d228be565ec7801521511079f07f3b3d                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )                                                                   │
+│  │ ObjectType: 0x2::package::UpgradeCap                                                                                                                            │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: B3Pvu2XMp1A47S3Co5KmFrJSjVMg13vdqS6zVKGAGwrf                                                                                                            │
+│  └──                                                                                                                                                               │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0x410233b39bacb5aee8f88d4d178d34863e39c2e9fa9084078649fed26ff8bd3a                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )                                                                   │
+│  │ ObjectType: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8::songsim::AdminCap                                                               │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: 9QTmQ5HQxJwtZehq4PHLckqxyawoNN2s9K92XQCbLkPH                                                                                                            │
+│  └──                                                                                                                                                               │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0x5fdb75cc0dced543a570639c70318f9ae601682f9b80443a52fe02607d04c6f5                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Shared( 653454473 )                                                                                                                                      │
+│  │ ObjectType: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8::access_policy::AccessRegistry                                                   │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: By8AtA5eUHUVManSs5ch3AqzS1dmFFf6ejEz4j2zDz7C                                                                                                            │
+│  └──                                                                                                                                                               │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0x7eab83c5ed2db60be655bcf5d7d09b21586df6377159efd563752a6d2ccdf3d7                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Shared( 653454473 )                                                                                                                                      │
+│  │ ObjectType: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8::songsim::PlatformConfig                                                         │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: AGyvBWnFLmYdNDGviCRZTrk5DVujiHLpf5Ps45Db5yLa                                                                                                            │
+│  └──                                                                                                                                                               │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0x9ffee877806babd61c47fef5a034cdf74e9ff1878dae50f878fc742290803acb                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Shared( 653454473 )                                                                                                                                      │
+│  │ ObjectType: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8::migration::MigrationState                                                       │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: CP6XFDPKfNeNTHDfiPzvB73aGmQkkfi2c1kRxQcw7guJ                                                                                                            │
+│  └──                                                                                                                                                               │
+│ Mutated Objects:                                                                                                                                                   │
+│  ┌──                                                                                                                                                               │
+│  │ ObjectID: 0xf1a8c28b9e6eaeb0836a770d6e42e8d8c85f0c3ff5800541904969e75273848e                                                                                    │
+│  │ Sender: 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8                                                                                      │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )                                                                   │
+│  │ ObjectType: 0x2::coin::Coin<0x2::sui::SUI>                                                                                                                      │
+│  │ Version: 653454473                                                                                                                                              │
+│  │ Digest: 6DwbPQTXP6TGsRGTDVbbznKc1bNZHzjyDgFiUkM4kgLe                                                                                                            │
+│  └──                                                                                                                                                               │
+│ Published Objects:                                                                                                                                                 │
+│  ┌──                                                                                                                                                               │
+│  │ PackageID: 0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8                                                                                   │
+│  │ Version: 1                                                                                                                                                      │
+│  │ Digest: 7rQyK4afoxTxkFPYniYGeHGqut8CydTkYmQiHpZoPPmP                                                                                                            │
+│  │ Modules: access_policy, consensus, constants, dispute, emergency, events, migration, prize_pool, profile, quality, registry, reputation, songsim, staking, task │
+│  └──                                                                                                                                                               │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Balance Changes                                                                                   │
+├───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  ┌──                                                                                              │
+│  │ Owner: Account Address ( 0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8 )  │
+│  │ CoinType: 0x2::sui::SUI                                                                        │
+│  │ Amount: -307716680                                                                             │
+│  └──                                                                                              │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────╯

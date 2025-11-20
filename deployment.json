@@ -1,68 +1,40 @@
 {
   "network": "testnet",
-  "deployed_at": "2025-11-17T00:00:00Z",
-  "transaction_digest": "Zj28PWfThjUacPJN1RD91z1PCzmC1Kz8Rr4A47jvRwR",
-  "package_id": "0xd567fd084674a7c76ea3edb4e184b1423139ae5bcda8c4c1e3a3a9569494b5a9",
-  "module_name": "songsim",
-  "objects": {
-    "admin_cap": {
-      "id": "0x91aa99c208529bfd1d6fb29615bc0edc22c96650eb87edd767105954c069f70c",
-      "type": "AdminCap",
-      "owner": "0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8",
-      "version": "653454467"
-    },
-    "platform_config": {
-      "id": "0x3328e5960db91a2d23096c57c5c36cc7dcaa7dd41e555658e34302368e7aa579",
-      "type": "PlatformConfig",
-      "owner": "Shared",
-      "version": "653454467",
-      "initial_values": {
-        "fee_bps": 500,
-        "fee_recipient": "0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8",
-        "min_bounty": 1000000,
-        "is_paused": false
-      }
-    },
-    "task_registry": {
-      "id": "0xb533457c790097908beb7f6a13e3c665d2bdeb73a8abc8df43087a55d8ca90be",
-      "type": "TaskRegistry",
-      "owner": "Shared",
-      "version": "653454467"
-    },
-    "upgrade_cap": {
-      "id": "0x6630e9a4ab5be2a5b63dff774be100b441f5ca8488cbf20b0226c1c35c7b2fb5",
-      "type": "UpgradeCap",
-      "owner": "0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8",
-      "version": "653454467"
-    }
-  },
+  "version": "1.0.0",
+  "deployedAt": "2025-11-20T00:00:00Z",
   "deployer": "0x3527f66f5855d0ffe9de29db24172ef67e339fe41629367c615b06b74871dab8",
-  "gas_used": {
-    "storage_cost": "54210800 MIST",
-    "computation_cost": "1000000 MIST",
-    "total": "54232680 MIST"
+  "packageId": "0x1ef8195a657616247acfc6f05cb62bd4fc0c10b7ab24cd4d41d1c16039d0a2c8",
+  "upgradeCap": "0x2db2475337d66afcfe925a697c8c0c81d228be565ec7801521511079f07f3b3d",
+  "adminCap": "0x410233b39bacb5aee8f88d4d178d34863e39c2e9fa9084078649fed26ff8bd3a",
+  "sharedObjects": {
+    "platformConfig": "0x7eab83c5ed2db60be655bcf5d7d09b21586df6377159efd563752a6d2ccdf3d7",
+    "taskRegistry": "0x1c181ed3f4a5a9a332c8c2ae0306ada73f8e56d3eb8ffb2afc55dd0a2cfa2023",
+    "migrationState": "0x9ffee877806babd61c47fef5a034cdf74e9ff1878dae50f878fc742290803acb",
+    "accessRegistry": "0x5fdb75cc0dced543a570639c70318f9ae601682f9b80443a52fe02607d04c6f5"
   },
-  "explorer_links": {
-    "transaction": "https://testnet.suivision.xyz/txblock/Zj28PWfThjUacPJN1RD91z1PCzmC1Kz8Rr4A47jvRwR",
-    "package": "https://testnet.suivision.xyz/package/0xd567fd084674a7c76ea3edb4e184b1423139ae5bcda8c4c1e3a3a9569494b5a9",
-    "admin_cap": "https://testnet.suivision.xyz/object/0x91aa99c208529bfd1d6fb29615bc0edc22c96650eb87edd767105954c069f70c",
-    "platform_config": "https://testnet.suivision.xyz/object/0x3328e5960db91a2d23096c57c5c36cc7dcaa7dd41e555658e34302368e7aa579",
-    "task_registry": "https://testnet.suivision.xyz/object/0xb533457c790097908beb7f6a13e3c665d2bdeb73a8abc8df43087a55d8ca90be"
+  "transaction": {
+    "digest": "6XB51ZrBCQu1LBPfnhfsTvNmL2xjpM95MCfd8Bk7RKE3",
+    "explorerUrl": "https://suiscan.xyz/testnet/tx/6XB51ZrBCQu1LBPfnhfsTvNmL2xjpM95MCfd8Bk7RKE3"
   },
-  "contract_info": {
-    "version": "0.1.0",
-    "milestone": "M1",
-    "features": [
-      "Platform initialization with AdminCap",
-      "User profile management",
-      "Task creation with bounty locking",
-      "Submission workflow",
-      "Consensus algorithm (majority voting)",
-      "Payout distribution with 5% platform fee",
-      "Reputation scoring system",
-      "Task cancellation and refunds",
-      "Emergency withdrawal"
-    ],
-    "test_coverage": "18/18 tests passing (100%)"
-  }
+  "gasUsed": {
+    "storageCost": "305694800 MIST",
+    "computationCost": "3000000 MIST",
+    "storageRebate": "978120 MIST",
+    "total": "307716680 MIST"
+  },
+  "features": [
+    "Core platform with AdminCap",
+    "User profiles with Walrus avatars",
+    "Task creation with automated escrow",
+    "Multi-labeler consensus",
+    "Reputation system (0-1000 scale)",
+    "Anti-Sybil staking",
+    "Quality metrics tracking",
+    "Emergency circuit breaker",
+    "Version tracking & upgrades",
+    "Optional Seal encryption",
+    "Dispute resolution",
+    "Prize pools"
+  ],
+  "testCoverage": "36/36 tests passing (100%)"
 }

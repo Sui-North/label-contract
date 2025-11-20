@@ -9,6 +9,7 @@ use songsim::constants;
 /// Global registry for lookups (shared object)
 public struct TaskRegistry has key {
     id: UID,
+    version: u64, // Schema version for migrations
     tasks: Table<u64, address>, // task_id -> Task object address
     submissions: Table<u64, address>, // submission_id -> Submission object address
     profiles: Table<address, address>, // user address -> UserProfile object address
@@ -31,6 +32,7 @@ public struct TaskRegistry has key {
 public fun create(ctx: &mut TxContext): TaskRegistry {
     TaskRegistry {
         id: object::new(ctx),
+        version: 1, // Current schema version
         tasks: table::new(ctx),
         submissions: table::new(ctx),
         profiles: table::new(ctx),

@@ -38,6 +38,8 @@ const EStakeLocked: u64 = 32;
 const EInvalidSubsystem: u64 = 33;
 const ESubsystemPaused: u64 = 34;
 const EPaginationError: u64 = 35;
+const EDuplicateVote: u64 = 36;
+const EInvalidUpgrade: u64 = 37;
 
 // === Platform Constants ===
 const DEFAULT_PLATFORM_FEE_BPS: u64 = 500; // 5% (500 basis points)
@@ -162,6 +164,10 @@ public fun e_invalid_subsystem(): u64 { EInvalidSubsystem }
 public fun e_subsystem_paused(): u64 { ESubsystemPaused }
 
 public fun e_pagination_error(): u64 { EPaginationError }
+
+public fun e_duplicate_vote(): u64 { EDuplicateVote }
+
+public fun e_invalid_upgrade(): u64 { EInvalidUpgrade }
 
 // === Public Constant Accessors ===
 public fun default_platform_fee_bps(): u64 { DEFAULT_PLATFORM_FEE_BPS }
