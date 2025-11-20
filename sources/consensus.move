@@ -287,7 +287,7 @@ public fun create_payout_batch(
     }
 }
 
-/// Process a batch of payouts
+/// Process a batch of payouts (continuation for large batches)
 public fun process_payout_batch(
     batch: &mut PayoutBatch,
     task: &mut Task,
@@ -304,7 +304,10 @@ public fun process_payout_batch(
         end_index = batch.total_recipients;
     };
 
+    let mut total_paid = 0u64;
+    let mut paid_recipients = vector::empty();
     let mut i = batch.processed_count;
+    
     while (i < end_index) {
         let labeler = *vector::borrow(&batch.recipients, i);
         
@@ -315,11 +318,20 @@ public fun process_payout_batch(
 
         let net_payout = batch.payout_per_recipient - batch.fee_per_recipient;
         events::emit_payout_distributed(task::get_task_id(task), labeler, net_payout);
-
+        
+        vector::push_back(&mut paid_recipients, labeler);
+        total_paid = total_paid + net_payout;
         i = i + 1;
     };
 
     batch.processed_count = end_index;
+    
+    // Emit batch event with recipient count
+    events::emit_batch_payout_distributed(
+        task::get_task_id(task),
+        vector::length(&paid_recipients),
+        total_paid
+    );
 }
 
 // === Helper Functions ===

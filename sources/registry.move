@@ -88,6 +88,60 @@ public(package) fun register_submission(registry: &mut TaskRegistry, submission_
     submission_id
 }
 
+// === Task Query Functions ===
+
+/// Get tasks with cursor-based pagination
+public fun get_tasks_paginated(
+    registry: &TaskRegistry,
+    cursor: u64,
+    limit: u64,
+): (vector<address>, u64) {
+    assert!(limit > 0 && limit <= constants::pagination_max_limit(), constants::e_pagination_error());
+    
+    let mut results = vector::empty();
+    let task_count = registry.next_task_id;
+    let mut current = cursor;
+    
+    while (current < task_count && vector::length(&results) < limit) {
+        if (table::contains(&registry.tasks, current)) {
+            let task_addr = *table::borrow(&registry.tasks, current);
+            vector::push_back(&mut results, task_addr);
+        };
+        current = current + 1;
+    };
+    
+    let next_cursor = if (current < task_count) { current } else { 0 }; // 0 = no more
+    (results, next_cursor)
+}
+
+/// Get active tasks with pagination
+public fun get_active_tasks_paginated(
+    registry: &TaskRegistry,
+    cursor: u64,
+    limit: u64,
+): (vector<address>, u64) {
+    assert!(limit > 0 && limit <= constants::pagination_max_limit(), constants::e_pagination_error());
+    
+    let mut results = vector::empty();
+    let (active_keys, _) = vec_map::into_keys_values(registry.active_task_ids);
+    let total = vector::length(&active_keys);
+    let mut i = cursor;
+    
+    while (i < total && vector::length(&results) < limit) {
+        let task_id = *vector::borrow(&active_keys, i);
+        if (vec_map::contains(&registry.active_task_ids, &task_id)) {
+            if (table::contains(&registry.tasks, task_id)) {
+                let task_addr = *table::borrow(&registry.tasks, task_id);
+                vector::push_back(&mut results, task_addr);
+            };
+        };
+        i = i + 1;
+    };
+    
+    let next_cursor = if (i < total) { i } else { 0 };
+    (results, next_cursor)
+}
+
 // === Profile Registration ===
 
 public(package) fun register_profile(registry: &mut TaskRegistry, user: address, profile_addr: address) {

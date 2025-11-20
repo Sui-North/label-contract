@@ -210,3 +210,69 @@ public(package) fun emit_prize_pool_joined(pool_id: u64, participant: address, t
 public(package) fun emit_prize_pool_winner(pool_id: u64, winner: address, prize_amount: u64) {
     event::emit(PrizePoolWinner { pool_id, winner, prize_amount });
 }
+
+// === Staking Events ===
+
+public struct LabelerStaked has copy, drop {
+    labeler: address,
+    amount: u64,
+    locked_until: u64,
+}
+
+public struct StakeSlashed has copy, drop {
+    labeler: address,
+    amount: u64,
+    reason: vector<u8>,
+}
+
+public struct StakeWithdrawn has copy, drop {
+    labeler: address,
+    remaining_balance: u64,
+}
+
+// === Batch Payout Events ===
+
+public struct BatchPayoutDistributed has copy, drop {
+    task_id: u64,
+    recipient_count: u64,
+    total_amount: u64,
+}
+
+// === Emergency Events ===
+
+public struct EmergencyPauseActivated has copy, drop {
+    subsystem: u8,
+    reason: vector<u8>,
+    paused_at: u64,
+}
+
+public struct EmergencyPauseDeactivated has copy, drop {
+    subsystem: u8,
+    resumed_at: u64,
+}
+
+// === New Event Emission Functions ===
+
+public(package) fun emit_labeler_staked(labeler: address, amount: u64, locked_until: u64) {
+    event::emit(LabelerStaked { labeler, amount, locked_until });
+}
+
+public(package) fun emit_stake_slashed(labeler: address, amount: u64, reason: vector<u8>) {
+    event::emit(StakeSlashed { labeler, amount, reason });
+}
+
+public(package) fun emit_stake_withdrawn(labeler: address, remaining_balance: u64) {
+    event::emit(StakeWithdrawn { labeler, remaining_balance });
+}
+
+public(package) fun emit_batch_payout_distributed(task_id: u64, recipient_count: u64, total_amount: u64) {
+    event::emit(BatchPayoutDistributed { task_id, recipient_count, total_amount });
+}
+
+public(package) fun emit_emergency_pause_activated(subsystem: u8, reason: vector<u8>, paused_at: u64) {
+    event::emit(EmergencyPauseActivated { subsystem, reason, paused_at });
+}
+
+public(package) fun emit_emergency_pause_deactivated(subsystem: u8, resumed_at: u64) {
+    event::emit(EmergencyPauseDeactivated { subsystem, resumed_at });
+}

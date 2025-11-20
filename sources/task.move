@@ -355,6 +355,10 @@ public fun get_submission_task_id(submission: &Submission): u64 {
     submission.task_id
 }
 
+public fun get_submission_result_url(submission: &Submission): String {
+    submission.result_url
+}
+
 /// Validate that submission belongs to task
 public fun validate_submission_belongs_to_task(task: &Task, submission_id: u64) {
     assert!(vector::contains(&task.submission_ids, &submission_id), constants::e_task_not_found());
@@ -363,4 +367,18 @@ public fun validate_submission_belongs_to_task(task: &Task, submission_id: u64) 
 /// Check if a labeler has already submitted to this task
 public fun has_labeler_submitted(task: &Task, labeler: address): bool {
     vec_set::contains(&task.labeler_addresses, &labeler)
+}
+
+/// Validate labeler eligibility based on reputation and task value
+public fun validate_labeler_eligibility(
+    bounty_amount: u64,
+    reputation_score: u64,
+) {
+    // High-value tasks require minimum reputation
+    if (bounty_amount >= constants::high_value_threshold()) {
+        assert!(
+            reputation_score >= constants::min_reputation_high_value(),
+            constants::e_insufficient_reputation()
+        );
+    };
 }

@@ -32,6 +32,12 @@ const EBatchIndexOutOfBounds: u64 = 26;
 const EFeeExceedsPayout: u64 = 27;
 const EDuplicateSubmission: u64 = 28;
 const ESubmissionDeadlinePassed: u64 = 29;
+const EInsufficientStake: u64 = 30;
+const EInsufficientReputation: u64 = 31;
+const EStakeLocked: u64 = 32;
+const EInvalidSubsystem: u64 = 33;
+const ESubsystemPaused: u64 = 34;
+const EPaginationError: u64 = 35;
 
 // === Platform Constants ===
 const DEFAULT_PLATFORM_FEE_BPS: u64 = 500; // 5% (500 basis points)
@@ -41,6 +47,11 @@ const MAX_BOUNTY: u64 = 1_000_000_000_000_000; // 1M SUI (prevent overflow)
 const MAX_BATCH_SIZE: u64 = 50; // Maximum payouts per transaction
 const REVIEW_BUFFER_MS: u64 = 86400000; // 24 hours in milliseconds
 const MAX_DECAY_PERIODS: u64 = 6; // Maximum reputation decay (6 months)
+const MIN_LABELER_STAKE: u64 = 10_000_000; // 0.01 SUI minimum stake
+const HIGH_VALUE_THRESHOLD: u64 = 100_000_000; // 0.1 SUI (tasks requiring higher reputation)
+const MIN_REPUTATION_HIGH_VALUE: u64 = 700; // 70% reputation score for high-value tasks
+const STAKE_LOCK_DURATION: u64 = 2592000000; // 30 days in milliseconds
+const PAGINATION_MAX_LIMIT: u64 = 100; // Maximum items per page
 
 // === Reputation Constants ===
 const REPUTATION_DECAY_PERIOD: u64 = 2592000000; // 30 days in milliseconds
@@ -140,6 +151,18 @@ public fun e_duplicate_submission(): u64 { EDuplicateSubmission }
 
 public fun e_submission_deadline_passed(): u64 { ESubmissionDeadlinePassed }
 
+public fun e_insufficient_stake(): u64 { EInsufficientStake }
+
+public fun e_insufficient_reputation(): u64 { EInsufficientReputation }
+
+public fun e_stake_locked(): u64 { EStakeLocked }
+
+public fun e_invalid_subsystem(): u64 { EInvalidSubsystem }
+
+public fun e_subsystem_paused(): u64 { ESubsystemPaused }
+
+public fun e_pagination_error(): u64 { EPaginationError }
+
 // === Public Constant Accessors ===
 public fun default_platform_fee_bps(): u64 { DEFAULT_PLATFORM_FEE_BPS }
 
@@ -208,3 +231,13 @@ public fun submission_status_pending(): u8 { SUBMISSION_STATUS_PENDING }
 public fun submission_status_accepted(): u8 { SUBMISSION_STATUS_ACCEPTED }
 
 public fun submission_status_rejected(): u8 { SUBMISSION_STATUS_REJECTED }
+
+public fun min_labeler_stake(): u64 { MIN_LABELER_STAKE }
+
+public fun high_value_threshold(): u64 { HIGH_VALUE_THRESHOLD }
+
+public fun min_reputation_high_value(): u64 { MIN_REPUTATION_HIGH_VALUE }
+
+public fun stake_lock_duration(): u64 { STAKE_LOCK_DURATION }
+
+public fun pagination_max_limit(): u64 { PAGINATION_MAX_LIMIT }
