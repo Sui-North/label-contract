@@ -2,6 +2,7 @@
 /// User profile management for Songsim platform
 module songsim::profile;
 
+use std::string::String;
 use songsim::constants;
 use songsim::events;
 
@@ -9,9 +10,9 @@ use songsim::events;
 public struct UserProfile has key, store {
     id: UID,
     owner: address,
-    display_name: vector<u8>,
-    bio: vector<u8>,
-    avatar_url: vector<u8>,
+    display_name: String,
+    bio: String,
+    avatar_url: String,
     user_type: u8, // 1=requester, 2=labeler, 3=both, 4=admin
     created_at: u64,
     tasks_created: u64, // For requesters
@@ -23,9 +24,9 @@ public struct UserProfile has key, store {
 /// Create user profile
 public(package) fun create(
     owner: address,
-    display_name: vector<u8>,
-    bio: vector<u8>,
-    avatar_url: vector<u8>,
+    display_name: String,
+    bio: String,
+    avatar_url: String,
     user_type: u8,
     created_at: u64,
     ctx: &mut TxContext,
@@ -46,9 +47,9 @@ public(package) fun create(
 /// Update profile information
 public fun update(
     profile: &mut UserProfile,
-    display_name: vector<u8>,
-    bio: vector<u8>,
-    avatar_url: vector<u8>,
+    display_name: String,
+    bio: String,
+    avatar_url: String,
     ctx: &TxContext,
 ) {
     assert!(profile.owner == ctx.sender(), constants::e_unauthorized());
@@ -94,9 +95,9 @@ public fun get_stats(profile: &UserProfile): (u64, u64) {
 
 public fun get_details(profile: &UserProfile): (
     address,
-    vector<u8>,
-    vector<u8>,
-    vector<u8>,
+    String,
+    String,
+    String,
     u8,
     u64,
     u64,

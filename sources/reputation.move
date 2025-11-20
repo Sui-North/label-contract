@@ -150,7 +150,14 @@ fun apply_decay_internal(reputation: &mut Reputation, current_time: u64) {
     let periods_passed = time_diff / decay_period;
 
     if (periods_passed > 0) {
-        let decay_amount = periods_passed * constants::reputation_decay_amount();
+        // Cap decay at MAX_DECAY_PERIODS (6 months)
+        let capped_periods = if (periods_passed > constants::max_decay_periods()) {
+            constants::max_decay_periods()
+        } else {
+            periods_passed
+        };
+        
+        let decay_amount = capped_periods * constants::reputation_decay_amount();
         if (reputation.reputation_score > decay_amount) {
             reputation.reputation_score = reputation.reputation_score - decay_amount;
         } else {

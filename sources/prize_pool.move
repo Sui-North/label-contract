@@ -2,6 +2,7 @@
 /// Prize pool competitions for Songsim labelers
 module songsim::prize_pool;
 
+use std::string::String;
 use sui::balance::{Self, Balance};
 use sui::clock::{Self, Clock};
 use sui::coin::{Self, Coin};
@@ -13,8 +14,8 @@ use songsim::events;
 public struct PrizePool has key, store {
     id: UID,
     pool_id: u64,
-    name: vector<u8>,
-    description: vector<u8>,
+    name: String,
+    description: String,
     total_amount: u64,
     funds: Balance<SUI>,
     start_time: u64,
@@ -30,8 +31,8 @@ public struct PrizePool has key, store {
 /// Create a new prize pool
 public(package) fun create(
     pool_id: u64,
-    name: vector<u8>,
-    description: vector<u8>,
+    name: String,
+    description: String,
     funds: Coin<SUI>,
     start_time: u64,
     end_time: u64,

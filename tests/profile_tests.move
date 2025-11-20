@@ -1,6 +1,7 @@
 /// Tests for user profile management
 #[test_only]
 module songsim::profile_tests;
+use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::{Self, UserProfile};
@@ -28,9 +29,9 @@ fun test_create_requester_profile() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Requester",
-            b"Professional data requester",
-            b"avatar.png",
+            string::utf8(b"Requester"),
+            string::utf8(b"Professional data requester"),
+            string::utf8(b"avatar.png"),
             1, // Requester type
             &clock,
             ts::ctx(&mut scenario),
@@ -69,9 +70,9 @@ fun test_create_labeler_profile() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Labeler",
-            b"Professional labeler",
-            b"avatar.png",
+            string::utf8(b"Labeler"),
+            string::utf8(b"Professional labeler"),
+            string::utf8(b"avatar.png"),
             2, // Labeler type
             &clock,
             ts::ctx(&mut scenario),
@@ -109,9 +110,9 @@ fun test_cannot_create_duplicate_profile() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"User",
-            b"Bio",
-            b"avatar",
+            string::utf8(b"User"),
+            string::utf8(b"Bio"),
+            string::utf8(b"avatar"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -132,9 +133,9 @@ fun test_cannot_create_duplicate_profile() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"User2",
-            b"Bio2",
-            b"avatar2",
+            string::utf8(b"User2"),
+            string::utf8(b"Bio2"),
+            string::utf8(b"avatar2"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -171,9 +172,9 @@ fun test_update_profile() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Old Name",
-            b"Old Bio",
-            b"old_avatar.png",
+            string::utf8(b"Old Name"),
+            string::utf8(b"Old Bio"),
+            string::utf8(b"old_avatar.png"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -191,9 +192,9 @@ fun test_update_profile() {
 
         profile::update(
             &mut profile,
-            b"New Name",
-            b"New Bio",
-            b"new_avatar.png",
+            string::utf8(b"New Name"),
+            string::utf8(b"New Bio"),
+            string::utf8(b"new_avatar.png"),
             ts::ctx(&mut scenario),
         );
 
@@ -221,9 +222,9 @@ fun test_update_user_type() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"User",
-            b"Bio",
-            b"avatar",
+            string::utf8(b"User"),
+            string::utf8(b"Bio"),
+            string::utf8(b"avatar"),
             1, // Requester
             &clock,
             ts::ctx(&mut scenario),

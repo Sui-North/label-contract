@@ -3,6 +3,7 @@
 /// This module coordinates all sub-modules and provides the public API
 module songsim::songsim;
 
+use std::string::String;
 use sui::clock::{Self, Clock};
 use sui::coin::{Self, Coin};
 use sui::sui::SUI;
@@ -108,7 +109,7 @@ entry fun emergency_withdraw(
 }
 
 /// Resolve a dispute (requires AdminCap)
-public fun admin_resolve_dispute(_: &AdminCap, dispute: &mut Dispute, resolution: vector<u8>) {
+public fun admin_resolve_dispute(_: &AdminCap, dispute: &mut Dispute, resolution: String) {
     dispute::resolve(dispute, resolution);
 }
 
@@ -130,9 +131,9 @@ public fun admin_distribute_prize_pool(
 public fun create_profile(
     registry: &mut TaskRegistry,
     config: &mut PlatformConfig,
-    display_name: vector<u8>,
-    bio: vector<u8>,
-    avatar_url: vector<u8>,
+    display_name: String,
+    bio: String,
+    avatar_url: String,
     user_type: u8,
     clock: &Clock,
     ctx: &mut TxContext,
@@ -177,12 +178,12 @@ public fun create_task(
     registry: &mut TaskRegistry,
     config: &mut PlatformConfig,
     user_profile: &mut UserProfile,
-    dataset_url: vector<u8>,
-    dataset_filename: vector<u8>,
-    dataset_content_type: vector<u8>,
-    title: vector<u8>,
-    description: vector<u8>,
-    instructions: vector<u8>,
+    dataset_url: String,
+    dataset_filename: String,
+    dataset_content_type: String,
+    title: String,
+    description: String,
+    instructions: String,
     required_labelers: u64,
     deadline: u64,
     bounty: Coin<SUI>,
@@ -204,10 +205,13 @@ public fun create_task(
         clock,
     );
 
+    // Pre-allocate task ID to avoid race condition
+    let task_id = registry::get_next_task_id(registry);
+    
     // Register task and get ID
     let created_at = clock::timestamp_ms(clock);
     let new_task = task::create(
-        0, // Temporary, will be set by registry
+        task_id, // Use pre-allocated ID
         ctx.sender(),
         dataset_url,
         dataset_filename,
@@ -223,7 +227,7 @@ public fun create_task(
     );
     
     let task_addr = object::id_address(&new_task);
-    let task_id = registry::register_task(registry, task_addr);
+    registry::confirm_task_registration(registry, task_id, task_addr);
     
     // Update profile stats
     profile::increment_tasks_created(user_profile);
@@ -241,9 +245,9 @@ public fun submit_labels(
     registry: &mut TaskRegistry,
     labeling_task: &mut Task,
     user_profile: &mut UserProfile,
-    result_url: vector<u8>,
-    result_filename: vector<u8>,
-    result_content_type: vector<u8>,
+    result_url: String,
+    result_filename: String,
+    result_content_type: String,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
@@ -270,8 +274,8 @@ public fun submit_labels(
     let submission_addr = object::id_address(&new_submission);
     let submission_id = registry::register_submission(registry, submission_addr);
 
-    // Update task and profile
-    task::add_submission(labeling_task, submission_id);
+    // Update task and profile (checks for duplicates internally)
+    task::add_submission(labeling_task, submission_id, ctx.sender());
     profile::increment_submissions_count(user_profile);
 
     events::emit_submission_received(submission_id, task::get_task_id(labeling_task), ctx.sender(), submitted_at);
@@ -409,7 +413,7 @@ public fun create_dispute(
     registry: &mut TaskRegistry,
     task_id: u64,
     submission_id: u64,
-    reason: vector<u8>,
+    reason: String,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
@@ -439,8 +443,8 @@ public fun vote_on_dispute(user_dispute: &mut Dispute, vote_for: bool, ctx: &TxC
 /// Create a new prize pool
 public fun create_prize_pool(
     registry: &mut TaskRegistry,
-    name: vector<u8>,
-    description: vector<u8>,
+    name: String,
+    description: String,
     funds: Coin<SUI>,
     start_time: u64,
     end_time: u64,

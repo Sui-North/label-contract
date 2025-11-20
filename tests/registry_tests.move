@@ -1,6 +1,7 @@
 /// Tests for task registry and VecMap optimization
 #[test_only]
 module songsim::registry_tests;
+use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::UserProfile;
@@ -45,7 +46,7 @@ fun test_register_task_adds_to_active_list() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -64,12 +65,12 @@ fun test_register_task_adds_to_active_list() {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"data.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"data.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             2,
             test_helpers::future_deadline(),
             bounty,
@@ -101,7 +102,7 @@ fun test_register_multiple_tasks() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -123,12 +124,12 @@ fun test_register_multiple_tasks() {
                 &mut registry,
                 &mut config,
                 &mut profile,
-                b"dataset",
-                b"data.csv",
-                b"text/csv",
-                b"Task",
-                b"Desc",
-                b"Inst",
+                string::utf8(b"dataset"),
+                string::utf8(b"data.csv"),
+                string::utf8(b"text/csv"),
+                string::utf8(b"Task"),
+                string::utf8(b"Desc"),
+                string::utf8(b"Inst"),
                 2,
                 test_helpers::future_deadline(),
                 bounty,
@@ -164,7 +165,7 @@ fun test_deregister_task_on_completion() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -183,12 +184,12 @@ fun test_deregister_task_on_completion() {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"data.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"data.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             2,
             test_helpers::future_deadline(),
             bounty,
@@ -234,7 +235,7 @@ fun test_get_active_tasks_with_pagination() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -256,12 +257,12 @@ fun test_get_active_tasks_with_pagination() {
                 &mut registry,
                 &mut config,
                 &mut profile,
-                b"dataset",
-                b"data.csv",
-                b"text/csv",
-                b"Task",
-                b"Desc",
-                b"Inst",
+                string::utf8(b"dataset"),
+                string::utf8(b"data.csv"),
+                string::utf8(b"text/csv"),
+                string::utf8(b"Task"),
+                string::utf8(b"Desc"),
+                string::utf8(b"Inst"),
                 2,
                 test_helpers::future_deadline(),
                 bounty,
@@ -322,7 +323,7 @@ fun test_profile_exists_check() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -358,7 +359,7 @@ fun test_vecmap_efficient_lookups() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -379,12 +380,12 @@ fun test_vecmap_efficient_lookups() {
                 &mut registry,
                 &mut config,
                 &mut profile,
-                b"dataset",
-                b"data.csv",
-                b"text/csv",
-                b"Task",
-                b"Desc",
-                b"Inst",
+                string::utf8(b"dataset"),
+                string::utf8(b"data.csv"),
+                string::utf8(b"text/csv"),
+                string::utf8(b"Task"),
+                string::utf8(b"Desc"),
+                string::utf8(b"Inst"),
                 2,
                 test_helpers::future_deadline(),
                 bounty,

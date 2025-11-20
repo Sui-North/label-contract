@@ -61,6 +61,18 @@ public(package) fun register_task(registry: &mut TaskRegistry, task_addr: addres
     task_id
 }
 
+/// Get next task ID without incrementing (for pre-allocation)
+public(package) fun get_next_task_id(registry: &TaskRegistry): u64 {
+    registry.next_task_id
+}
+
+/// Confirm task registration with pre-allocated ID
+public(package) fun confirm_task_registration(registry: &mut TaskRegistry, task_id: u64, task_addr: address) {
+    table::add(&mut registry.tasks, task_id, task_addr);
+    vec_map::insert(&mut registry.active_task_ids, task_id, true);
+    registry.next_task_id = task_id + 1;
+}
+
 public(package) fun mark_task_inactive(registry: &mut TaskRegistry, task_id: u64) {
     if (vec_map::contains(&registry.active_task_ids, &task_id)) {
         let (_key, _val) = vec_map::remove(&mut registry.active_task_ids, &task_id);
@@ -213,7 +225,7 @@ public fun get_prize_pool_address(registry: &TaskRegistry, pool_id: u64): addres
 }
 
 /// Get next IDs
-public fun get_next_task_id(registry: &TaskRegistry): u64 {
+public fun get_next_task_id_view(registry: &TaskRegistry): u64 {
     registry.next_task_id
 }
 

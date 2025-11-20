@@ -2,10 +2,12 @@
 /// Task and submission management for Songsim platform
 module songsim::task;
 
+use std::string::{Self, String};
 use sui::balance::{Self, Balance};
 use sui::clock::{Self, Clock};
 use sui::coin::{Self, Coin};
 use sui::sui::SUI;
+use sui::vec_set::{Self, VecSet};
 use songsim::constants;
 use songsim::events;
 
@@ -14,12 +16,12 @@ public struct Task has key, store {
     id: UID,
     task_id: u64,
     requester: address,
-    dataset_url: vector<u8>,
-    dataset_filename: vector<u8>, // Original filename for proper downloads
-    dataset_content_type: vector<u8>, // MIME type (e.g., "text/csv", "application/json")
-    title: vector<u8>,
-    description: vector<u8>,
-    instructions: vector<u8>,
+    dataset_url: String,
+    dataset_filename: String, // Original filename for proper downloads
+    dataset_content_type: String, // MIME type (e.g., "text/csv", "application/json")
+    title: String,
+    description: String,
+    instructions: String,
     bounty: Balance<SUI>, // Store balance directly for safe management
     bounty_amount: u64, // Keep for reference/display
     status: u8,
@@ -30,6 +32,7 @@ public struct Task has key, store {
     created_at: u64,
     completed_at: u64,
     submission_ids: vector<u64>, // Track all submission IDs for validation
+    labeler_addresses: VecSet<address>, // Track unique labelers to prevent duplicates
 }
 
 /// Submission record
@@ -38,9 +41,9 @@ public struct Submission has key, store {
     submission_id: u64,
     task_id: u64,
     labeler: address,
-    result_url: vector<u8>,
-    result_filename: vector<u8>, // Original filename for proper downloads
-    result_content_type: vector<u8>, // MIME type
+    result_url: String,
+    result_filename: String, // Original filename for proper downloads
+    result_content_type: String, // MIME type
     submitted_at: u64,
     status: u8, // 0=pending, 1=accepted, 2=rejected
     reviewed_at: u64, // Timestamp when reviewed
@@ -52,12 +55,12 @@ public struct Submission has key, store {
 public(package) fun create(
     task_id: u64,
     requester: address,
-    dataset_url: vector<u8>,
-    dataset_filename: vector<u8>,
-    dataset_content_type: vector<u8>,
-    title: vector<u8>,
-    description: vector<u8>,
-    instructions: vector<u8>,
+    dataset_url: String,
+    dataset_filename: String,
+    dataset_content_type: String,
+    title: String,
+    description: String,
+    instructions: String,
     required_labelers: u64,
     deadline: u64,
     bounty: Coin<SUI>,
@@ -87,19 +90,20 @@ public(package) fun create(
         created_at,
         completed_at: 0,
         submission_ids: vector::empty(),
+        labeler_addresses: vec_set::empty(),
     }
 }
 
 /// Validate task creation parameters
 public fun validate_task_creation(
-    dataset_url: &vector<u8>,
+    dataset_url: &String,
     required_labelers: u64,
     deadline: u64,
     bounty_amount: u64,
     min_bounty: u64,
     clock: &Clock,
 ) {
-    assert!(vector::length(dataset_url) > 0, constants::e_invalid_blob_id());
+    assert!(string::length(dataset_url) > 0, constants::e_invalid_blob_id());
     assert!(required_labelers > 0, constants::e_invalid_task_status());
     assert!(bounty_amount >= min_bounty, constants::e_insufficient_bounty());
     assert!(bounty_amount <= constants::max_bounty(), constants::e_insufficient_bounty());
@@ -144,7 +148,16 @@ public(package) fun set_completed(task: &mut Task, accepted_count: u64, complete
 }
 
 /// Add submission ID to task
-public(package) fun add_submission(task: &mut Task, submission_id: u64) {
+public(package) fun add_submission(task: &mut Task, submission_id: u64, labeler: address) {
+    // Check for duplicate submission
+    assert!(
+        !vec_set::contains(&task.labeler_addresses, &labeler),
+        constants::e_duplicate_submission()
+    );
+    
+    // Add labeler to set
+    vec_set::insert(&mut task.labeler_addresses, labeler);
+    
     vector::push_back(&mut task.submission_ids, submission_id);
     task.submission_count = task.submission_count + 1;
     
@@ -181,9 +194,9 @@ public(package) fun create_submission(
     submission_id: u64,
     task_id: u64,
     labeler: address,
-    result_url: vector<u8>,
-    result_filename: vector<u8>,
-    result_content_type: vector<u8>,
+    result_url: String,
+    result_filename: String,
+    result_content_type: String,
     submitted_at: u64,
     ctx: &mut TxContext,
 ): Submission {
@@ -203,14 +216,23 @@ public(package) fun create_submission(
 
 /// Validate submission parameters
 public fun validate_submission(
-    result_url: &vector<u8>,
+    result_url: &String,
     task_status: u8,
     task_deadline: u64,
     clock: &Clock,
 ) {
-    assert!(vector::length(result_url) > 0, constants::e_invalid_blob_id());
+    assert!(string::length(result_url) > 0, constants::e_invalid_blob_id());
     assert!(task_status == constants::status_open(), constants::e_task_not_open());
-    assert!(clock::timestamp_ms(clock) < task_deadline, constants::e_invalid_deadline());
+    
+    // Apply 24-hour review buffer before deadline (prevent underflow for short deadlines)
+    let buffer = constants::review_buffer_ms();
+    assert!(task_deadline > buffer, constants::e_invalid_deadline());
+    
+    let submission_deadline = task_deadline - buffer;
+    assert!(
+        clock::timestamp_ms(clock) < submission_deadline,
+        constants::e_submission_deadline_passed()
+    );
 }
 
 /// Update submission status after consensus
@@ -336,4 +358,9 @@ public fun get_submission_task_id(submission: &Submission): u64 {
 /// Validate that submission belongs to task
 public fun validate_submission_belongs_to_task(task: &Task, submission_id: u64) {
     assert!(vector::contains(&task.submission_ids, &submission_id), constants::e_task_not_found());
+}
+
+/// Check if a labeler has already submitted to this task
+public fun has_labeler_submitted(task: &Task, labeler: address): bool {
+    vec_set::contains(&task.labeler_addresses, &labeler)
 }

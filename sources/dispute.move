@@ -2,6 +2,7 @@
 /// Dispute resolution system for Songsim
 module songsim::dispute;
 
+use std::string::String;
 use sui::clock::{Self, Clock};
 use songsim::constants;
 use songsim::events;
@@ -13,10 +14,10 @@ public struct Dispute has key, store {
     task_id: u64,
     submission_id: u64,
     disputer: address, // Who raised the dispute
-    reason: vector<u8>,
+    reason: String,
     created_at: u64,
     resolved: bool,
-    resolution: vector<u8>,
+    resolution: String,
     votes_for: u64,
     votes_against: u64,
     voters: vector<address>,
@@ -30,7 +31,7 @@ public(package) fun create(
     task_id: u64,
     submission_id: u64,
     disputer: address,
-    reason: vector<u8>,
+    reason: String,
     clock: &Clock,
     ctx: &mut TxContext,
 ): Dispute {
@@ -43,7 +44,7 @@ public(package) fun create(
         reason,
         created_at: clock::timestamp_ms(clock),
         resolved: false,
-        resolution: vector::empty(),
+        resolution: std::string::utf8(b""),
         votes_for: 0,
         votes_against: 0,
         voters: vector::empty(),
@@ -79,7 +80,7 @@ public fun vote(dispute: &mut Dispute, vote_for: bool, ctx: &TxContext) {
 }
 
 /// Resolve a dispute (admin/governance function)
-public(package) fun resolve(dispute: &mut Dispute, resolution: vector<u8>) {
+public(package) fun resolve(dispute: &mut Dispute, resolution: String) {
     assert!(!dispute.resolved, constants::e_dispute_already_resolved());
 
     dispute.resolved = true;

@@ -1,6 +1,7 @@
 /// Tests for platform initialization and admin functions
 #[test_only]
 module songsim::platform_tests;
+use std::string;
 
 use songsim::songsim::{Self, AdminCap, PlatformConfig};
 use songsim::registry::TaskRegistry;
@@ -179,9 +180,9 @@ fun test_platform_paused_prevents_task_creation() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Requester",
-            b"Bio",
-            b"avatar",
+            string::utf8(b"Requester"),
+            string::utf8(b"Bio"),
+            string::utf8(b"avatar"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -217,12 +218,12 @@ fun test_platform_paused_prevents_task_creation() {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"dataset.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"dataset.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             2,
             test_helpers::future_deadline(),
             bounty,

@@ -29,14 +29,13 @@ public struct PayoutBatch has key, store {
     recipients: vector<address>,
 }
 
-// === CRITICAL FIX #1: Proper Balance Validation ===
-
 /// Finalize consensus with AUTOMATED bounty distribution and SECURITY FIXES
 /// Fixes:
 /// - Uses actual balance instead of original bounty_amount
 /// - Validates labeler addresses match submissions
 /// - Implements reentrancy-safe pattern (state updates before transfers)
 /// - Supports batch processing for large submission counts
+/// - Awards remainder to first labeler (fairness)
 public fun finalize_consensus(
     task: &mut Task,
     accepted_submission_ids: vector<u64>,
@@ -61,6 +60,9 @@ public fun finalize_consensus(
 
     // Validate all submission IDs belong to this task
     validate_all_submissions_belong_to_task(task, &accepted_submission_ids, &rejected_submission_ids);
+    
+    // CRITICAL: Validate labeler addresses match submissions
+    validate_labelers_match_task(task, &accepted_labelers);
 
     // CRITICAL FIX: Use actual remaining balance, not original bounty_amount
     let remaining_balance = task::get_bounty_remaining(task);
@@ -68,6 +70,7 @@ public fun finalize_consensus(
 
     // Calculate payout based on ACTUAL balance
     let payout_per_labeler = remaining_balance / accepted_count;
+    let remainder = remaining_balance % accepted_count; // Track remainder
     assert!(payout_per_labeler > 0, constants::e_insufficient_balance());
 
     // Calculate fees with overflow protection
@@ -84,31 +87,37 @@ public fun finalize_consensus(
     while (i < accepted_count) {
         let labeler = *vector::borrow(&accepted_labelers, i);
         
+        // Award remainder to first labeler for fairness
+        let mut amount_to_withdraw = payout_per_labeler;
+        if (i == 0 && remainder > 0) {
+            amount_to_withdraw = amount_to_withdraw + remainder;
+        };
+        
         // Withdraw from task balance
-        let mut payment = task::withdraw_bounty(task, payout_per_labeler, ctx);
+        let mut payment = task::withdraw_bounty(task, amount_to_withdraw, ctx);
         
         // Split and transfer platform fee
         let fee_coin = coin::split(&mut payment, fee_amount, ctx);
         transfer::public_transfer(fee_coin, fee_recipient);
         
-        // Transfer net payout to labeler
+        // Transfer net payout to labeler (includes remainder for first labeler)
         transfer::public_transfer(payment, labeler);
         
         total_fees = total_fees + fee_amount;
         
-        events::emit_payout_distributed(task::get_task_id(task), labeler, net_payout);
+        // Event reflects actual amount received (with remainder for first)
+        let actual_payout = if (i == 0 && remainder > 0) {
+            net_payout + remainder
+        } else {
+            net_payout
+        };
+        events::emit_payout_distributed(task::get_task_id(task), labeler, actual_payout);
         
         i = i + 1;
     };
 
-    // Transfer any remaining bounty (dust/remainder) to platform wallet
-    let remaining = task::get_bounty_remaining(task);
-    if (remaining > 0) {
-        let remainder_coin = task::withdraw_all_bounty(task, ctx);
-        transfer::public_transfer(remainder_coin, fee_recipient);
-        
-        events::emit_platform_fee_collected(task::get_task_id(task), remaining, fee_recipient);
-    };
+    // No remaining bounty should exist now (all distributed)
+    // Remainder was awarded to first labeler
 
     events::emit_consensus_finalized(task::get_task_id(task), accepted_count, rejected_count);
     events::emit_platform_fee_collected(task::get_task_id(task), total_fees, fee_recipient);
@@ -132,6 +141,23 @@ public fun validate_labeler_matches_submission(
     provided_labeler: address,
 ) {
     assert!(submission_labeler == provided_labeler, constants::e_invalid_labeler_address());
+}
+
+/// Validate that all provided labelers have submitted to the task
+fun validate_labelers_match_task(
+    task: &Task,
+    labelers: &vector<address>,
+) {
+    let mut i = 0;
+    while (i < vector::length(labelers)) {
+        let labeler = *vector::borrow(labelers, i);
+        // Check if labeler is in the task's labeler set
+        assert!(
+            task::has_labeler_submitted(task, labeler),
+            constants::e_invalid_labeler_address()
+        );
+        i = i + 1;
+    };
 }
 
 // === Partial Task Finalization ===

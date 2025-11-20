@@ -30,6 +30,8 @@ const EBatchSizeTooLarge: u64 = 24;
 const EInsufficientBalance: u64 = 25;
 const EBatchIndexOutOfBounds: u64 = 26;
 const EFeeExceedsPayout: u64 = 27;
+const EDuplicateSubmission: u64 = 28;
+const ESubmissionDeadlinePassed: u64 = 29;
 
 // === Platform Constants ===
 const DEFAULT_PLATFORM_FEE_BPS: u64 = 500; // 5% (500 basis points)
@@ -37,6 +39,8 @@ const MIN_BOUNTY: u64 = 1_000_000; // 0.001 SUI (1 million MIST)
 const MAX_FEE_BPS: u64 = 1000; // 10% maximum
 const MAX_BOUNTY: u64 = 1_000_000_000_000_000; // 1M SUI (prevent overflow)
 const MAX_BATCH_SIZE: u64 = 50; // Maximum payouts per transaction
+const REVIEW_BUFFER_MS: u64 = 86400000; // 24 hours in milliseconds
+const MAX_DECAY_PERIODS: u64 = 6; // Maximum reputation decay (6 months)
 
 // === Reputation Constants ===
 const REPUTATION_DECAY_PERIOD: u64 = 2592000000; // 30 days in milliseconds
@@ -132,6 +136,10 @@ public fun e_batch_index_out_of_bounds(): u64 { EBatchIndexOutOfBounds }
 
 public fun e_fee_exceeds_payout(): u64 { EFeeExceedsPayout }
 
+public fun e_duplicate_submission(): u64 { EDuplicateSubmission }
+
+public fun e_submission_deadline_passed(): u64 { ESubmissionDeadlinePassed }
+
 // === Public Constant Accessors ===
 public fun default_platform_fee_bps(): u64 { DEFAULT_PLATFORM_FEE_BPS }
 
@@ -142,6 +150,10 @@ public fun max_fee_bps(): u64 { MAX_FEE_BPS }
 public fun max_bounty(): u64 { MAX_BOUNTY }
 
 public fun max_batch_size(): u64 { MAX_BATCH_SIZE }
+
+public fun review_buffer_ms(): u64 { REVIEW_BUFFER_MS }
+
+public fun max_decay_periods(): u64 { MAX_DECAY_PERIODS }
 
 public fun reputation_decay_period(): u64 { REPUTATION_DECAY_PERIOD }
 

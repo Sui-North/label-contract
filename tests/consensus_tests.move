@@ -1,6 +1,7 @@
 /// Tests for consensus finalization using actual exposed APIs
 #[test_only]
 module songsim::consensus_tests;
+use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::UserProfile;
@@ -20,7 +21,7 @@ fun setup_task_with_two_submissions(scenario: &mut ts::Scenario) {
         let mut config = ts::take_shared<PlatformConfig>(scenario);
         let clock = test_helpers::create_clock(ts::ctx(scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -40,12 +41,12 @@ fun setup_task_with_two_submissions(scenario: &mut ts::Scenario) {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"data.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"data.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             3, // Require 3 labelers but only 2 will submit
             test_helpers::future_deadline(),
             bounty,
@@ -73,7 +74,7 @@ fun setup_task_with_two_submissions(scenario: &mut ts::Scenario) {
             let mut config = ts::take_shared<PlatformConfig>(scenario);
             let clock = test_helpers::create_clock(ts::ctx(scenario));
 
-            songsim::create_profile(&mut registry, &mut config, b"Labeler", b"Bio", b"av", 2, &clock, ts::ctx(scenario));
+            songsim::create_profile(&mut registry, &mut config, string::utf8(b"Labeler"), string::utf8(b"Bio"), string::utf8(b"av"), 2, &clock, ts::ctx(scenario));
 
             test_helpers::destroy_clock(clock);
             ts::return_shared(registry);
@@ -88,7 +89,7 @@ fun setup_task_with_two_submissions(scenario: &mut ts::Scenario) {
             let mut registry = ts::take_shared<TaskRegistry>(scenario);
             let clock = test_helpers::create_clock(ts::ctx(scenario));
 
-            songsim::submit_labels(&mut registry, &mut task, &mut profile, b"labels_url", b"labels.json", b"application/json", &clock, ts::ctx(scenario));
+            songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(scenario));
 
             test_helpers::destroy_clock(clock);
             ts::return_to_sender(scenario, profile);
@@ -110,7 +111,7 @@ fun setup_task_for_full_consensus(scenario: &mut ts::Scenario) {
         let mut config = ts::take_shared<PlatformConfig>(scenario);
         let clock = test_helpers::create_clock(ts::ctx(scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -130,12 +131,12 @@ fun setup_task_for_full_consensus(scenario: &mut ts::Scenario) {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"data.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"data.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             2, // Require 2 labelers - will transition to IN_PROGRESS when both submit
             test_helpers::future_deadline(),
             bounty,
@@ -163,7 +164,7 @@ fun setup_task_for_full_consensus(scenario: &mut ts::Scenario) {
             let mut config = ts::take_shared<PlatformConfig>(scenario);
             let clock = test_helpers::create_clock(ts::ctx(scenario));
 
-            songsim::create_profile(&mut registry, &mut config, b"Labeler", b"Bio", b"av", 2, &clock, ts::ctx(scenario));
+            songsim::create_profile(&mut registry, &mut config, string::utf8(b"Labeler"), string::utf8(b"Bio"), string::utf8(b"av"), 2, &clock, ts::ctx(scenario));
 
             test_helpers::destroy_clock(clock);
             ts::return_shared(registry);
@@ -178,7 +179,7 @@ fun setup_task_for_full_consensus(scenario: &mut ts::Scenario) {
             let mut registry = ts::take_shared<TaskRegistry>(scenario);
             let clock = test_helpers::create_clock(ts::ctx(scenario));
 
-            songsim::submit_labels(&mut registry, &mut task, &mut profile, b"labels_url", b"labels.json", b"application/json", &clock, ts::ctx(scenario));
+            songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(scenario));
 
             test_helpers::destroy_clock(clock);
             ts::return_to_sender(scenario, profile);
@@ -344,7 +345,7 @@ fun test_finalize_partial_task_after_deadline() {
         let mut clock = test_helpers::create_clock(ts::ctx(&mut scenario));
         
         // Set clock past deadline
-        test_helpers::set_clock_time(&mut clock, test_helpers::future_deadline() + 1000);
+        test_helpers::set_clock_timestamp(&mut clock, test_helpers::future_deadline() + 1000);
 
         let accepted_ids = vector[1]; // Only accept first submission
         let accepted_labelers = vector[test_helpers::labeler1()];

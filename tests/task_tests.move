@@ -1,6 +1,7 @@
 /// Tests for task and submission lifecycle with Clock integration
 #[test_only]
 module songsim::task_tests;
+use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::UserProfile;
@@ -30,9 +31,9 @@ fun test_create_task_with_valid_params() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Requester",
-            b"Bio",
-            b"avatar",
+            string::utf8(b"Requester"),
+            string::utf8(b"Bio"),
+            string::utf8(b"avatar"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -56,12 +57,12 @@ fun test_create_task_with_valid_params() {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset_url",
-            b"dataset.csv",
-            b"text/csv",
-            b"Label Images",
-            b"Detailed description",
-            b"Instructions",
+            string::utf8(b"dataset_url"),
+            string::utf8(b"dataset.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Label Images"),
+            string::utf8(b"Detailed description"),
+            string::utf8(b"Instructions"),
             3, // Required labelers
             test_helpers::future_deadline(),
             bounty,
@@ -102,9 +103,9 @@ fun test_cannot_create_task_with_past_deadline() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Requester",
-            b"Bio",
-            b"avatar",
+            string::utf8(b"Requester"),
+            string::utf8(b"Bio"),
+            string::utf8(b"avatar"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -123,19 +124,19 @@ fun test_cannot_create_task_with_past_deadline() {
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let mut clock = test_helpers::create_clock(ts::ctx(&mut scenario));
         
-        // Set clock to future, then use past deadline
-        test_helpers::set_clock_time(&mut clock, 10000);
+        // Set clock to future (year 2025), then use past deadline (year 2020)
+        test_helpers::set_clock_timestamp(&mut clock, test_helpers::future_deadline());
 
         songsim::create_task(
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"data.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"data.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             2,
             test_helpers::past_deadline(), // Past deadline
             bounty,
@@ -170,9 +171,9 @@ fun test_cannot_create_task_with_insufficient_bounty() {
         songsim::create_profile(
             &mut registry,
             &mut config,
-            b"Requester",
-            b"Bio",
-            b"avatar",
+            string::utf8(b"Requester"),
+            string::utf8(b"Bio"),
+            string::utf8(b"avatar"),
             1,
             &clock,
             ts::ctx(&mut scenario),
@@ -195,12 +196,12 @@ fun test_cannot_create_task_with_insufficient_bounty() {
             &mut registry,
             &mut config,
             &mut profile,
-            b"dataset",
-            b"data.csv",
-            b"text/csv",
-            b"Task",
-            b"Desc",
-            b"Inst",
+            string::utf8(b"dataset"),
+            string::utf8(b"data.csv"),
+            string::utf8(b"text/csv"),
+            string::utf8(b"Task"),
+            string::utf8(b"Desc"),
+            string::utf8(b"Inst"),
             2,
             test_helpers::future_deadline(),
             bounty,
@@ -237,7 +238,7 @@ fun test_submit_labels() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -252,7 +253,7 @@ fun test_submit_labels() {
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_task(&mut registry, &mut config, &mut profile, b"ds", b"d.csv", b"text/csv", b"T", b"D", b"I", 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
+        songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_to_sender(&scenario, profile);
@@ -267,7 +268,7 @@ fun test_submit_labels() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Lab", b"Bio", b"av", 2, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Lab"), string::utf8(b"Bio"), string::utf8(b"av"), 2, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -282,7 +283,7 @@ fun test_submit_labels() {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::submit_labels(&mut registry, &mut task, &mut profile, b"labels_url", b"labels.json", b"application/json", &clock, ts::ctx(&mut scenario));
+        songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_to_sender(&scenario, profile);
@@ -315,7 +316,7 @@ fun test_cannot_submit_after_deadline() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -330,7 +331,7 @@ fun test_cannot_submit_after_deadline() {
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_task(&mut registry, &mut config, &mut profile, b"ds", b"d.csv", b"text/csv", b"T", b"D", b"I", 2, 10000, bounty, &clock, ts::ctx(&mut scenario));
+        songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, 10000, bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_to_sender(&scenario, profile);
@@ -345,7 +346,7 @@ fun test_cannot_submit_after_deadline() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Lab", b"Bio", b"av", 2, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Lab"), string::utf8(b"Bio"), string::utf8(b"av"), 2, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -361,9 +362,9 @@ fun test_cannot_submit_after_deadline() {
         let mut clock = test_helpers::create_clock(ts::ctx(&mut scenario));
         
         // Advance clock past deadline
-        test_helpers::set_clock_time(&mut clock, 20000);
+        test_helpers::set_clock_timestamp(&mut clock, 20000);
 
-        songsim::submit_labels(&mut registry, &mut task, &mut profile, b"labels_url", b"labels.json", b"application/json", &clock, ts::ctx(&mut scenario));
+        songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_to_sender(&scenario, profile);
@@ -391,7 +392,7 @@ fun test_cancel_task_with_no_submissions() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -406,7 +407,7 @@ fun test_cancel_task_with_no_submissions() {
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_task(&mut registry, &mut config, &mut profile, b"ds", b"d.csv", b"text/csv", b"T", b"D", b"I", 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
+        songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_to_sender(&scenario, profile);
@@ -445,7 +446,7 @@ fun test_only_requester_can_cancel_task() {
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_profile(&mut registry, &mut config, b"Req", b"Bio", b"av", 1, &clock, ts::ctx(&mut scenario));
+        songsim::create_profile(&mut registry, &mut config, string::utf8(b"Req"), string::utf8(b"Bio"), string::utf8(b"av"), 1, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_shared(registry);
@@ -460,7 +461,7 @@ fun test_only_requester_can_cancel_task() {
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::create_task(&mut registry, &mut config, &mut profile, b"ds", b"d.csv", b"text/csv", b"T", b"D", b"I", 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
+        songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
         ts::return_to_sender(&scenario, profile);
