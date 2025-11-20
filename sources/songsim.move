@@ -15,6 +15,7 @@ use songsim::prize_pool::{Self, PrizePool};
 use songsim::profile::{Self, UserProfile};
 use songsim::registry::{Self, TaskRegistry};
 use songsim::reputation::{Self, Reputation};
+use songsim::staking::{Self, LabelerStake};
 use songsim::task::{Self, Task, Submission};
 use songsim::consensus::{ConsensusResult, PayoutBatch};
 use songsim::migration::{Self, MigrationState};
@@ -440,6 +441,49 @@ public fun apply_reputation_decay(user_reputation: &mut Reputation, clock: &Cloc
     reputation::apply_decay(user_reputation, clock::timestamp_ms(clock));
 }
 
+// === Staking Functions ===
+
+/// Create stake for labeler (anti-Sybil protection)
+public fun create_labeler_stake(
+    config: &PlatformConfig,
+    stake_coin: Coin<SUI>,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    // Verify platform not paused
+    assert!(!config.paused, constants::e_platform_paused());
+    
+    // Verify minimum stake
+    assert!(
+        coin::value(&stake_coin) >= constants::min_labeler_stake(), 
+        constants::e_insufficient_stake()
+    );
+    
+    // Create stake through staking module
+    let stake = staking::create_stake(
+        ctx.sender(),
+        stake_coin,
+        clock,
+        ctx,
+    );
+    
+    // Transfer stake object to labeler
+    transfer::public_transfer(stake, ctx.sender());
+}
+
+/// Withdraw stake after lock period
+public fun withdraw_labeler_stake(
+    stake: LabelerStake,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    // Withdraw through staking module (checks lock period internally)
+    let coins = staking::withdraw_stake(stake, clock, ctx);
+    
+    // Transfer coins back to labeler
+    transfer::public_transfer(coins, ctx.sender());
+}
+
 // === Dispute Resolution ===
 
 /// Create a dispute for a submission
@@ -578,6 +622,31 @@ public fun get_active_task_ids(registry: &TaskRegistry, start_index: u64, limit:
 
 public fun get_all_task_ids(registry: &TaskRegistry, start_id: u64, limit: u64): vector<u64> {
     registry::get_all_task_ids(registry, start_id, limit)
+}
+
+// Staking
+public fun get_stake_labeler(stake: &LabelerStake): address {
+    staking::get_labeler(stake)
+}
+
+public fun get_stake_value(stake: &LabelerStake): u64 {
+    staking::get_stake_value(stake)
+}
+
+public fun get_stake_remaining_balance(stake: &LabelerStake): u64 {
+    staking::get_remaining_balance(stake)
+}
+
+public fun get_stake_locked_until(stake: &LabelerStake): u64 {
+    staking::get_locked_until(stake)
+}
+
+public fun get_stake_slashed_amount(stake: &LabelerStake): u64 {
+    staking::get_slashed_amount(stake)
+}
+
+public fun is_stake_locked(stake: &LabelerStake, clock: &Clock): bool {
+    staking::is_locked(stake, clock)
 }
 
 // === Test-only Functions ===
