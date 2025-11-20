@@ -325,6 +325,11 @@ entry fun cancel_task(labeling_task: &mut Task, clock: &Clock, ctx: &mut TxConte
     transfer::public_transfer(refund_coin, ctx.sender());
 }
 
+/// Extend task deadline (only by requester, for open/in-progress tasks)
+public fun extend_deadline(labeling_task: &mut Task, new_deadline: u64, clock: &Clock, ctx: &TxContext) {
+    task::extend_deadline(labeling_task, new_deadline, clock, ctx);
+}
+
 // === Consensus & Payout ===
 
 /// Execute consensus with AUTOMATED bounty distribution (ESCROW PROTECTION)

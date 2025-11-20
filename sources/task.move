@@ -135,6 +135,35 @@ public fun cancel_task(task: &mut Task, clock: &Clock, ctx: &mut TxContext): Coi
     refund_coin
 }
 
+/// Extend task deadline (only by requester, for open/in-progress tasks)
+public fun extend_deadline(task: &mut Task, new_deadline: u64, clock: &Clock, ctx: &TxContext) {
+    // Only requester can extend deadline
+    assert!(task.requester == ctx.sender(), constants::e_unauthorized());
+    
+    // Can only extend for open or in-progress tasks
+    assert!(
+        task.status == constants::status_open() || task.status == constants::status_in_progress(),
+        constants::e_invalid_task_status()
+    );
+    
+    // New deadline must be in the future
+    assert!(new_deadline > clock::timestamp_ms(clock), constants::e_invalid_deadline());
+    
+    // New deadline must be greater than current deadline (can't shorten)
+    assert!(new_deadline > task.deadline, constants::e_invalid_deadline());
+    
+    let old_deadline = task.deadline;
+    task.deadline = new_deadline;
+    
+    events::emit_task_deadline_extended(
+        task.task_id,
+        task.requester,
+        old_deadline,
+        new_deadline,
+        clock::timestamp_ms(clock),
+    );
+}
+
 /// Update task status to in-progress
 public(package) fun set_in_progress(task: &mut Task) {
     task.status = constants::status_in_progress();

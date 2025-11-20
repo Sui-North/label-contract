@@ -34,6 +34,14 @@ public struct TaskCancelled has copy, drop {
     timestamp: u64,
 }
 
+public struct TaskDeadlineExtended has copy, drop {
+    task_id: u64,
+    requester: address,
+    old_deadline: u64,
+    new_deadline: u64,
+    timestamp: u64,
+}
+
 // === Submission Events ===
 
 public struct SubmissionReceived has copy, drop {
@@ -153,6 +161,10 @@ public(package) fun emit_task_created(task_id: u64, requester: address, bounty_a
 
 public(package) fun emit_task_cancelled(task_id: u64, requester: address, refund_amount: u64, timestamp: u64) {
     event::emit(TaskCancelled { task_id, requester, refund_amount, timestamp });
+}
+
+public(package) fun emit_task_deadline_extended(task_id: u64, requester: address, old_deadline: u64, new_deadline: u64, timestamp: u64) {
+    event::emit(TaskDeadlineExtended { task_id, requester, old_deadline, new_deadline, timestamp });
 }
 
 public(package) fun emit_submission_received(submission_id: u64, task_id: u64, labeler: address, timestamp: u64) {
