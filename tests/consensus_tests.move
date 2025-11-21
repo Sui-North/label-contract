@@ -1,4 +1,5 @@
 /// Tests for consensus module
+#[test_only]
 module songsim::consensus_tests;
 
 use songsim::consensus::{Self, ConsensusResult, PayoutBatch};

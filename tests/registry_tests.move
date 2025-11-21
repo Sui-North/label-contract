@@ -1,574 +1,388 @@
 /// Tests for registry module
 module songsim::registry_tests;
 
-use songsim::consensus::{Self, ConsensusResult, PayoutBatch};
 use songsim::constants;
-use songsim::dispute::{Self, Dispute};
 use songsim::events;
-use songsim::prize_pool::{Self, PrizePool};
-use songsim::profile::{Self, UserProfile};
-use songsim::quality::{Self, QualityTracker};
-use songsim::registry::{Self, TaskRegistry};
-use songsim::reputation::{Self, Reputation};
-use songsim::task::{Self, Task, Submission};
-use std::string::String;
+use songsim::task::{Self, Task};
 use sui::clock::{Self, Clock};
 use sui::coin::{Self, Coin};
 use sui::sui::SUI;
 
-// === Platform Core Structs ===
-
-/// Admin capability - non-transferable
-public struct AdminCap has key {
+/// Consensus result
+public struct ConsensusResult has key, store {
     id: UID,
+    task_id: u64,
+    accepted_submissions: vector<u64>,
+    rejected_submissions: vector<u64>,
+    consensus_at: u64,
 }
 
-/// Platform configuration (shared object)
-public struct PlatformConfig has key {
+/// Payout batch state (for multi-transaction payouts)
+public struct PayoutBatch has key, store {
     id: UID,
-    fee_bps: u64, // Platform fee in basis points (1 bps = 0.01%)
-    fee_recipient: address, // Address receiving platform fees
-    min_bounty: u64, // Minimum task bounty
-    paused: bool, // Emergency pause flag
-    total_tasks: u64, // Total tasks created
-    total_profiles: u64, // Total profiles created
+    task_id: u64,
+    total_recipients: u64,
+    processed_count: u64,
+    payout_per_recipient: u64,
+    fee_per_recipient: u64,
+    recipients: vector<address>,
 }
 
-// === Init Function ===
-
-/// Module initializer - creates AdminCap, PlatformConfig, and TaskRegistry
-fun init(ctx: &mut TxContext) {
-    // Create and transfer AdminCap to deployer
-    let admin_cap = AdminCap {
-        id: object::new(ctx),
-    };
-    transfer::transfer(admin_cap, ctx.sender());
-
-    // Create and share PlatformConfig
-    let config = PlatformConfig {
-        id: object::new(ctx),
-        fee_bps: constants::default_platform_fee_bps(),
-        fee_recipient: ctx.sender(),
-        min_bounty: constants::min_bounty(),
-        paused: false,
-        total_tasks: 0,
-        total_profiles: 0,
-    };
-    transfer::share_object(config);
-
-    // Create and share TaskRegistry
-    registry::create_and_share(ctx);
-}
-
-// === Admin Functions ===
-
-/// Update platform fee (requires AdminCap)
-public fun update_platform_fee(_: &AdminCap, config: &mut PlatformConfig, new_fee_bps: u64) {
-    assert!(new_fee_bps <= constants::max_fee_bps(), constants::e_invalid_fee_percentage());
-    config.fee_bps = new_fee_bps;
-
-    events::emit_platform_config_updated(new_fee_bps, config.fee_recipient);
-}
-
-/// Update fee recipient (requires AdminCap)
-public fun update_fee_recipient(_: &AdminCap, config: &mut PlatformConfig, new_recipient: address) {
-    config.fee_recipient = new_recipient;
-
-    events::emit_platform_config_updated(config.fee_bps, new_recipient);
-}
-
-/// Pause/unpause platform (requires AdminCap)
-public fun set_platform_paused(_: &AdminCap, config: &mut PlatformConfig, paused: bool) {
-    config.paused = paused;
-}
-
-/// Update minimum bounty (requires AdminCap)
-public fun update_min_bounty(_: &AdminCap, config: &mut PlatformConfig, new_min_bounty: u64) {
-    config.min_bounty = new_min_bounty;
-}
-
-/// Emergency withdrawal of platform fees (requires AdminCap)
-entry fun emergency_withdraw(
-    _: &AdminCap,
-    amount: u64,
-    recipient: address,
-    mut payment: Coin<SUI>,
-    ctx: &mut TxContext,
-) {
-    let withdraw_coin = coin::split(&mut payment, amount, ctx);
-    transfer::public_transfer(withdraw_coin, recipient);
-
-    // Return remaining coins to sender
-    if (coin::value(&payment) > 0) {
-        transfer::public_transfer(payment, ctx.sender());
-    } else {
-        coin::destroy_zero(payment);
-    };
-}
-
-/// Resolve a dispute (requires AdminCap)
-public fun admin_resolve_dispute(_: &AdminCap, dispute: &mut Dispute, resolution: String) {
-    dispute::resolve(dispute, resolution);
-}
-
-/// Distribute prize pool (requires AdminCap)
-public fun admin_distribute_prize_pool(
-    _: &AdminCap,
-    pool: &mut PrizePool,
-    winners: vector<address>,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
-    prize_pool::distribute(pool, winners, clock, ctx);
-}
-
-// === Profile Management ===
-
-/// Create user profile
-#[allow(lint(self_transfer))]
-public fun create_profile(
-    registry: &mut TaskRegistry,
-    config: &mut PlatformConfig,
-    display_name: String,
-    bio: String,
-    avatar_url: String,
-    user_type: u8,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
-    let sender = ctx.sender();
-    assert!(!registry::has_profile(registry, sender), constants::e_profile_already_exists());
-
-    let created_at = clock::timestamp_ms(clock);
-
-    // Create profile
-    let user_profile = profile::create(
-        sender,
-        display_name,
-        bio,
-        avatar_url,
-        user_type,
-        created_at,
-        ctx,
-    );
-    let profile_addr = object::id_address(&user_profile);
-
-    // Create initial reputation
-    let user_reputation = reputation::create(sender, created_at, ctx);
-    let rep_addr = object::id_address(&user_reputation);
-
-    // Register in tables
-    registry::register_profile(registry, sender, profile_addr);
-    registry::register_reputation(registry, sender, rep_addr);
-    config.total_profiles = config.total_profiles + 1;
-
-    events::emit_profile_created(profile_addr, sender, user_type, created_at);
-
-    // Transfer objects to owner
-    transfer::public_transfer(user_profile, sender);
-    transfer::public_transfer(user_reputation, sender);
-}
-
-// === Task Management ===
-
-/// Create new labeling task
-public fun create_task(
-    registry: &mut TaskRegistry,
-    config: &mut PlatformConfig,
-    user_profile: &mut UserProfile,
-    dataset_url: String,
-    dataset_filename: String,
-    dataset_content_type: String,
-    title: String,
-    description: String,
-    instructions: String,
-    required_labelers: u64,
-    deadline: u64,
-    bounty: Coin<SUI>,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
-    assert!(!config.paused, constants::e_platform_paused());
-    assert!(profile::get_owner(user_profile) == ctx.sender(), constants::e_unauthorized());
-
-    let bounty_amount = coin::value(&bounty);
-
-    // Validate task parameters
-    task::validate_task_creation(
-        &dataset_url,
-        required_labelers,
-        deadline,
-        bounty_amount,
-        config.min_bounty,
-        clock,
-    );
-
-    // Pre-allocate task ID to avoid race condition
-    let task_id = registry::get_next_task_id(registry);
-
-    // Register task and get ID
-    let created_at = clock::timestamp_ms(clock);
-    let new_task = task::create(
-        task_id, // Use pre-allocated ID
-        ctx.sender(),
-        dataset_url,
-        dataset_filename,
-        dataset_content_type,
-        title,
-        description,
-        instructions,
-        required_labelers,
-        deadline,
-        bounty,
-        created_at,
-        ctx,
-    );
-
-    let task_addr = object::id_address(&new_task);
-    registry::confirm_task_registration(registry, task_id, task_addr);
-
-    // Update profile stats
-    profile::increment_tasks_created(user_profile);
-    config.total_tasks = config.total_tasks + 1;
-
-    events::emit_task_created(task_id, ctx.sender(), bounty_amount, deadline);
-
-    // Make task a shared object so labelers can submit to it
-    transfer::public_share_object(new_task);
-}
-
-/// Submit labels for a task
-#[allow(lint(self_transfer))]
-public fun submit_labels(
-    registry: &mut TaskRegistry,
-    labeling_task: &mut Task,
-    user_profile: &mut UserProfile,
-    result_url: String,
-    result_filename: String,
-    result_content_type: String,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
-    assert!(profile::get_owner(user_profile) == ctx.sender(), constants::e_unauthorized());
-
-    // Validate submission
-    let (_, _, _, _, status, _, _, _, deadline, _, _) = task::get_task_details(labeling_task);
-    task::validate_submission(&result_url, status, deadline, clock);
-
-    let submitted_at = clock::timestamp_ms(clock);
-
-    // Create submission
-    let new_submission = task::create_submission(
-        0, // Temporary, will be set by registry
-        task::get_task_id(labeling_task),
-        ctx.sender(),
-        result_url,
-        result_filename,
-        result_content_type,
-        submitted_at,
-        ctx,
-    );
-
-    let submission_addr = object::id_address(&new_submission);
-    let submission_id = registry::register_submission(registry, submission_addr);
-
-    // Update task and profile (checks for duplicates internally)
-    task::add_submission(labeling_task, submission_id, ctx.sender());
-    profile::increment_submissions_count(user_profile);
-
-    events::emit_submission_received(
-        submission_id,
-        task::get_task_id(labeling_task),
-        ctx.sender(),
-        submitted_at,
-    );
-
-    // Transfer submission to labeler
-    transfer::public_transfer(new_submission, ctx.sender());
-}
-
-/// Cancel task and refund bounty (only if no submissions)
-entry fun cancel_task(labeling_task: &mut Task, clock: &Clock, ctx: &mut TxContext) {
-    let refund_coin = task::cancel_task(labeling_task, clock, ctx);
-    transfer::public_transfer(refund_coin, ctx.sender());
-}
-
-// === Consensus & Payout ===
-
-/// Execute consensus with AUTOMATED bounty distribution (ESCROW PROTECTION)
-#[allow(lint(self_transfer))]
+/// Finalize consensus with AUTOMATED bounty distribution and SECURITY FIXES
+/// Fixes:
+/// - Uses actual balance instead of original bounty_amount
+/// - Validates labeler addresses match submissions
+/// - Implements reentrancy-safe pattern (state updates before transfers)
+/// - Supports batch processing for large submission counts
+/// - Awards remainder to first labeler (fairness)
 public fun finalize_consensus(
-    registry: &mut TaskRegistry,
-    config: &PlatformConfig,
-    labeling_task: &mut Task,
-    requester_profile: &mut UserProfile,
+    task: &mut Task,
     accepted_submission_ids: vector<u64>,
     accepted_labelers: vector<address>,
     rejected_submission_ids: vector<u64>,
-    rejected_labelers: vector<address>,
-    quality_tracker: &mut QualityTracker,
+    fee_bps: u64,
+    fee_recipient: address,
     clock: &Clock,
     ctx: &mut TxContext,
-) {
-    let consensus_result = consensus::finalize_consensus(
-        registry,
-        labeling_task,
-        requester_profile,
-        accepted_submission_ids,
-        accepted_labelers,
-        rejected_submission_ids,
-        rejected_labelers,
-        quality_tracker,
-        config.fee_bps,
-        config.fee_recipient,
-        clock,
-        ctx,
+): ConsensusResult {
+    // Authorization check
+    assert!(task::get_requester(task) == ctx.sender(), constants::e_unauthorized());
+    assert!(
+        task::get_status(task) == constants::status_in_progress(),
+        constants::e_invalid_task_status(),
     );
 
-    // Transfer consensus result to requester
-    transfer::public_transfer(consensus_result, ctx.sender());
+    let accepted_count = vector::length(&accepted_submission_ids);
+    let rejected_count = vector::length(&rejected_submission_ids);
+
+    // Validation checks
+    assert!(accepted_count > 0, constants::e_no_submissions());
+    assert!(
+        accepted_count == vector::length(&accepted_labelers),
+        constants::e_invalid_task_status(),
+    );
+    assert!(accepted_count <= constants::max_batch_size(), constants::e_batch_size_too_large());
+
+    // Validate all submission IDs belong to this task
+    validate_all_submissions_belong_to_task(
+        task,
+        &accepted_submission_ids,
+        &rejected_submission_ids,
+    );
+
+    // CRITICAL: Validate labeler addresses match submissions
+    validate_labelers_match_task(task, &accepted_labelers);
+
+    // CRITICAL FIX: Use actual remaining balance, not original bounty_amount
+    let remaining_balance = task::get_bounty_remaining(task);
+    assert!(remaining_balance > 0, constants::e_insufficient_balance());
+
+    // Calculate payout based on ACTUAL balance
+    let payout_per_labeler = remaining_balance / accepted_count;
+    let remainder = remaining_balance % accepted_count; // Track remainder
+    assert!(payout_per_labeler > 0, constants::e_insufficient_balance());
+
+    // Calculate fees with overflow protection
+    let fee_amount = (payout_per_labeler * fee_bps) / 10000;
+    assert!(fee_amount < payout_per_labeler, constants::e_fee_exceeds_payout());
+    let net_payout = payout_per_labeler - fee_amount;
+
+    // STATE UPDATE FIRST (reentrancy protection pattern)
+    task::set_completed(task, accepted_count, clock::timestamp_ms(clock));
+
+    // Then perform transfers
+    let mut total_fees = 0u64;
+    let mut i = 0;
+    while (i < accepted_count) {
+        let labeler = *vector::borrow(&accepted_labelers, i);
+
+        // Award remainder to first labeler for fairness
+        let mut amount_to_withdraw = payout_per_labeler;
+        if (i == 0 && remainder > 0) {
+            amount_to_withdraw = amount_to_withdraw + remainder;
+        };
+
+        // Withdraw from task balance
+        let mut payment = task::withdraw_bounty(task, amount_to_withdraw, ctx);
+
+        // Split and transfer platform fee
+        let fee_coin = coin::split(&mut payment, fee_amount, ctx);
+        transfer::public_transfer(fee_coin, fee_recipient);
+
+        // Transfer net payout to labeler (includes remainder for first labeler)
+        transfer::public_transfer(payment, labeler);
+
+        total_fees = total_fees + fee_amount;
+
+        // Event reflects actual amount received (with remainder for first)
+        let actual_payout = if (i == 0 && remainder > 0) {
+            net_payout + remainder
+        } else {
+            net_payout
+        };
+        events::emit_payout_distributed(task::get_task_id(task), labeler, actual_payout);
+
+        i = i + 1;
+    };
+
+    // No remaining bounty should exist now (all distributed)
+    // Remainder was awarded to first labeler
+
+    events::emit_consensus_finalized(task::get_task_id(task), accepted_count, rejected_count);
+    events::emit_platform_fee_collected(task::get_task_id(task), total_fees, fee_recipient);
+
+    // Create consensus result
+    ConsensusResult {
+        id: object::new(ctx),
+        task_id: task::get_task_id(task),
+        accepted_submissions: accepted_submission_ids,
+        rejected_submissions: rejected_submission_ids,
+        consensus_at: clock::timestamp_ms(clock),
+    }
 }
+
+// === CRITICAL FIX #2: Labeler Address Validation ===
+
+/// Validate that accepted labelers match their submissions
+/// This prevents payment theft by malicious requesters
+public fun validate_labeler_matches_submission(
+    submission_labeler: address,
+    provided_labeler: address,
+) {
+    assert!(submission_labeler == provided_labeler, constants::e_invalid_labeler_address());
+}
+
+/// Validate that all provided labelers have submitted to the task
+fun validate_labelers_match_task(task: &Task, labelers: &vector<address>) {
+    let mut i = 0;
+    while (i < vector::length(labelers)) {
+        let labeler = *vector::borrow(labelers, i);
+        // Check if labeler is in the task's labeler set
+        assert!(task::has_labeler_submitted(task, labeler), constants::e_invalid_labeler_address());
+        i = i + 1;
+    };
+}
+
+// === Partial Task Finalization ===
 
 /// Finalize task with partial submissions (deadline passed, reward partial work)
-#[allow(lint(self_transfer))]
+/// Distributes fair portion to labelers who submitted and refunds remainder to requester
 public fun finalize_partial_task(
-    config: &PlatformConfig,
-    labeling_task: &mut Task,
+    task: &mut Task,
     accepted_submission_ids: vector<u64>,
     accepted_labelers: vector<address>,
     rejected_submission_ids: vector<u64>,
+    fee_bps: u64,
+    fee_recipient: address,
     clock: &Clock,
     ctx: &mut TxContext,
-) {
-    let consensus_result = consensus::finalize_partial_task(
-        labeling_task,
-        accepted_submission_ids,
-        accepted_labelers,
-        rejected_submission_ids,
-        config.fee_bps,
-        config.fee_recipient,
-        clock,
-        ctx,
+): ConsensusResult {
+    // Authorization and timing checks
+    assert!(task::get_requester(task) == ctx.sender(), constants::e_unauthorized());
+    let task_status = task::get_status(task);
+    assert!(
+        task_status == constants::status_open() || task_status == constants::status_in_progress(),
+        constants::e_invalid_task_status(),
     );
 
-    transfer::public_transfer(consensus_result, ctx.sender());
-}
+    let (_, _, _, _, _, _, submission_count, _, deadline, _, _) = task::get_task_details(task);
+    let required_labelers = get_task_required_labelers(task);
 
-/// Update submission status after consensus
-public fun update_submission_status(
-    submission: &mut Submission,
-    labeling_task: &Task,
-    is_accepted: bool,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
-    task::update_submission_status(
-        submission,
-        labeling_task,
-        is_accepted,
-        clock::timestamp_ms(clock),
-        ctx.sender(),
+    assert!(clock::timestamp_ms(clock) > deadline, constants::e_invalid_deadline());
+    assert!(submission_count > 0, constants::e_no_submissions());
+    assert!(submission_count < required_labelers, constants::e_consensus_threshold_not_met());
+
+    let accepted_count = vector::length(&accepted_submission_ids);
+    let rejected_count = vector::length(&rejected_submission_ids);
+    let total_reviewed = accepted_count + rejected_count;
+
+    assert!(total_reviewed == submission_count, constants::e_invalid_task_status());
+    assert!(accepted_count > 0, constants::e_no_submissions());
+    assert!(
+        accepted_count == vector::length(&accepted_labelers),
+        constants::e_invalid_task_status(),
     );
+
+    // Validate all submission IDs belong to this task
+    validate_all_submissions_belong_to_task(
+        task,
+        &accepted_submission_ids,
+        &rejected_submission_ids,
+    );
+
+    // Calculate fair distribution: portion based on actual vs required labelers
+    let bounty_amount = get_task_bounty_amount(task);
+    let fair_bounty_portion = (bounty_amount * accepted_count) / required_labelers;
+    let payout_per_labeler = fair_bounty_portion / accepted_count;
+
+    let fee_amount = (payout_per_labeler * fee_bps) / 10000;
+    assert!(fee_amount < payout_per_labeler, constants::e_fee_exceeds_payout());
+    let net_payout = payout_per_labeler - fee_amount;
+    let mut total_fees = 0u64;
+
+    // STATE UPDATE FIRST
+    task::set_completed(task, accepted_count, clock::timestamp_ms(clock));
+
+    // Distribute to accepted labelers
+    let mut i = 0;
+    while (i < accepted_count) {
+        let labeler = *vector::borrow(&accepted_labelers, i);
+
+        let mut payment = task::withdraw_bounty(task, payout_per_labeler, ctx);
+        let fee_coin = coin::split(&mut payment, fee_amount, ctx);
+        transfer::public_transfer(fee_coin, fee_recipient);
+        transfer::public_transfer(payment, labeler);
+
+        total_fees = total_fees + fee_amount;
+
+        events::emit_payout_distributed(task::get_task_id(task), labeler, net_payout);
+
+        i = i + 1;
+    };
+
+    // Refund remaining bounty to requester
+    let remaining = task::get_bounty_remaining(task);
+    if (remaining > 0) {
+        let refund_coin = task::withdraw_all_bounty(task, ctx);
+        transfer::public_transfer(refund_coin, task::get_requester(task));
+
+        events::emit_task_cancelled(
+            task::get_task_id(task),
+            task::get_requester(task),
+            remaining,
+            clock::timestamp_ms(clock),
+        );
+    };
+
+    events::emit_platform_fee_collected(task::get_task_id(task), total_fees, fee_recipient);
+    events::emit_consensus_finalized(task::get_task_id(task), accepted_count, rejected_count);
+
+    ConsensusResult {
+        id: object::new(ctx),
+        task_id: task::get_task_id(task),
+        accepted_submissions: accepted_submission_ids,
+        rejected_submissions: rejected_submission_ids,
+        consensus_at: clock::timestamp_ms(clock),
+    }
 }
 
 // === Batch Processing for Large Tasks ===
 
-/// Create payout batch for tasks with >50 labelers
-#[allow(lint(self_transfer))]
+/// Create a payout batch for large tasks (>50 labelers)
+/// This allows splitting payouts across multiple transactions to avoid gas limits
 public fun create_payout_batch(
-    config: &PlatformConfig,
-    labeling_task: &mut Task,
+    task: &mut Task,
     accepted_labelers: vector<address>,
+    fee_bps: u64,
     ctx: &mut TxContext,
 ): PayoutBatch {
-    consensus::create_payout_batch(labeling_task, accepted_labelers, config.fee_bps, ctx)
+    assert!(task::get_requester(task) == ctx.sender(), constants::e_unauthorized());
+    assert!(
+        task::get_status(task) == constants::status_in_progress(),
+        constants::e_invalid_task_status(),
+    );
+
+    let total_recipients = vector::length(&accepted_labelers);
+    assert!(total_recipients > 0, constants::e_no_submissions());
+
+    let remaining_balance = task::get_bounty_remaining(task);
+    let payout_per_recipient = remaining_balance / total_recipients;
+    let fee_per_recipient = (payout_per_recipient * fee_bps) / 10000;
+
+    PayoutBatch {
+        id: object::new(ctx),
+        task_id: task::get_task_id(task),
+        total_recipients,
+        processed_count: 0,
+        payout_per_recipient,
+        fee_per_recipient,
+        recipients: accepted_labelers,
+    }
 }
 
 /// Process a batch of payouts
 public fun process_payout_batch(
-    config: &PlatformConfig,
     batch: &mut PayoutBatch,
-    labeling_task: &mut Task,
+    task: &mut Task,
     count: u64,
+    fee_recipient: address,
     ctx: &mut TxContext,
 ) {
-    consensus::process_payout_batch(batch, labeling_task, count, config.fee_recipient, ctx);
-}
-
-// === Reputation Management ===
-
-/// Update reputation after submission review
-public fun update_reputation(user_reputation: &mut Reputation, accepted: bool, ctx: &TxContext) {
-    reputation::update_simple(user_reputation, accepted, ctx);
-}
-
-/// Update reputation with weighted scoring
-public fun update_reputation_weighted(
-    user_reputation: &mut Reputation,
-    accepted: bool,
-    task_difficulty: u64,
-    clock: &Clock,
-) {
-    reputation::update_weighted(
-        user_reputation,
-        accepted,
-        task_difficulty,
-        clock::timestamp_ms(clock),
+    assert!(task::get_task_id(task) == batch.task_id, constants::e_task_not_found());
+    assert!(
+        batch.processed_count < batch.total_recipients,
+        constants::e_batch_index_out_of_bounds(),
     );
+    assert!(count <= constants::max_batch_size(), constants::e_batch_size_too_large());
+
+    let mut end_index = batch.processed_count + count;
+    if (end_index > batch.total_recipients) {
+        end_index = batch.total_recipients;
+    };
+
+    let mut i = batch.processed_count;
+    while (i < end_index) {
+        let labeler = *vector::borrow(&batch.recipients, i);
+
+        let mut payment = task::withdraw_bounty(task, batch.payout_per_recipient, ctx);
+        let fee_coin = coin::split(&mut payment, batch.fee_per_recipient, ctx);
+        transfer::public_transfer(fee_coin, fee_recipient);
+        transfer::public_transfer(payment, labeler);
+
+        let net_payout = batch.payout_per_recipient - batch.fee_per_recipient;
+        events::emit_payout_distributed(task::get_task_id(task), labeler, net_payout);
+
+        i = i + 1;
+    };
+
+    batch.processed_count = end_index;
 }
 
-/// Apply reputation decay based on inactivity
-public fun apply_reputation_decay(user_reputation: &mut Reputation, clock: &Clock) {
-    reputation::apply_decay(user_reputation, clock::timestamp_ms(clock));
-}
+// === Helper Functions ===
 
-// === Dispute Resolution ===
-
-/// Create a dispute for a submission
-public fun create_dispute(
-    registry: &mut TaskRegistry,
-    task_id: u64,
-    submission_id: u64,
-    reason: String,
-    clock: &Clock,
-    ctx: &mut TxContext,
+fun validate_all_submissions_belong_to_task(
+    task: &Task,
+    accepted_submission_ids: &vector<u64>,
+    rejected_submission_ids: &vector<u64>,
 ) {
-    let new_dispute = dispute::create(
-        0, // Temporary, will be set by registry
-        task_id,
-        submission_id,
-        ctx.sender(),
-        reason,
-        clock,
-        ctx,
-    );
+    let mut i = 0;
+    let accepted_count = vector::length(accepted_submission_ids);
+    while (i < accepted_count) {
+        let sub_id = *vector::borrow(accepted_submission_ids, i);
+        task::validate_submission_belongs_to_task(task, sub_id);
+        i = i + 1;
+    };
 
-    let dispute_addr = object::id_address(&new_dispute);
-    let _dispute_id = registry::register_dispute(registry, dispute_addr);
-
-    transfer::public_share_object(new_dispute);
+    i = 0;
+    let rejected_count = vector::length(rejected_submission_ids);
+    while (i < rejected_count) {
+        let sub_id = *vector::borrow(rejected_submission_ids, i);
+        task::validate_submission_belongs_to_task(task, sub_id);
+        i = i + 1;
+    };
 }
 
-/// Vote on a dispute
-public fun vote_on_dispute(user_dispute: &mut Dispute, vote_for: bool, ctx: &TxContext) {
-    dispute::vote(user_dispute, vote_for, ctx);
+// Temporary accessors (until we add these to task module)
+fun get_task_required_labelers(task: &Task): u64 {
+    let (_, _, _, _, _, required_labelers) = task::get_task_info(task);
+    required_labelers
 }
 
-// === Prize Pool Functions ===
-
-/// Create a new prize pool
-public fun create_prize_pool(
-    registry: &mut TaskRegistry,
-    name: String,
-    description: String,
-    funds: Coin<SUI>,
-    start_time: u64,
-    end_time: u64,
-    min_submissions: u64,
-    winners_count: u64,
-    ctx: &mut TxContext,
-) {
-    let new_pool = prize_pool::create(
-        0, // Temporary, will be set by registry
-        name,
-        description,
-        funds,
-        start_time,
-        end_time,
-        min_submissions,
-        winners_count,
-        ctx,
-    );
-
-    let pool_addr = object::id_address(&new_pool);
-    let _pool_id = registry::register_prize_pool(registry, pool_addr);
-
-    transfer::public_share_object(new_pool);
+fun get_task_bounty_amount(task: &Task): u64 {
+    let (_, _, bounty_amount, _, _, _) = task::get_task_info(task);
+    bounty_amount
 }
 
-/// Join a prize pool
-public fun join_prize_pool(pool: &mut PrizePool, clock: &Clock, ctx: &TxContext) {
-    prize_pool::join(pool, clock, ctx);
+// === View Functions ===
+
+public fun get_consensus_result(result: &ConsensusResult): (u64, vector<u64>, vector<u64>, u64) {
+    (result.task_id, result.accepted_submissions, result.rejected_submissions, result.consensus_at)
 }
 
-// === View Functions (delegate to sub-modules) ===
-
-// Profile
-public fun get_profile_stats(user_profile: &UserProfile): (u64, u64, u64, u64, u64, u64, u64) {
-    profile::get_stats(user_profile)
+public fun get_batch_progress(batch: &PayoutBatch): (u64, u64) {
+    (batch.processed_count, batch.total_recipients)
 }
 
-// Reputation
-public fun get_reputation_score(user_reputation: &Reputation): u64 {
-    reputation::get_score(user_reputation)
-}
-
-public fun get_reputation_details(
-    user_reputation: &Reputation,
-): (address, u64, u64, u64, u64, u64, vector<u8>) {
-    reputation::get_details(user_reputation)
-}
-
-// Task
-public fun get_task_info(labeling_task: &Task): (u64, address, u64, u8, u64, u64) {
-    task::get_task_info(labeling_task)
-}
-
-public fun get_task_details(
-    labeling_task: &Task,
-): (u64, address, u64, u64, u8, u64, u64, u64, u64, u64, u64) {
-    task::get_task_details(labeling_task)
-}
-
-public fun get_task_submission_ids(labeling_task: &Task): vector<u64> {
-    task::get_submission_ids(labeling_task)
-}
-
-public fun get_task_bounty_remaining(labeling_task: &Task): u64 {
-    task::get_bounty_remaining(labeling_task)
-}
-
-// Submission
-public fun get_submission_info(submission: &Submission): (u64, u64, address, u8) {
-    task::get_submission_info(submission)
-}
-
-public fun get_submission_details(submission: &Submission): (u64, u64, address, u8, u64, u64) {
-    task::get_submission_details(submission)
-}
-
-// Registry
-public fun task_exists(registry: &TaskRegistry, task_id: u64): bool {
-    registry::task_exists(registry, task_id)
-}
-
-public fun get_task_address(registry: &TaskRegistry, task_id: u64): address {
-    registry::get_task_address(registry, task_id)
-}
-
-public fun get_submission_address(registry: &TaskRegistry, submission_id: u64): address {
-    registry::get_submission_address(registry, submission_id)
-}
-
-public fun get_profile_address(registry: &TaskRegistry, user: address): address {
-    registry::get_profile_address(registry, user)
-}
-
-public fun get_reputation_address(registry: &TaskRegistry, user: address): address {
-    registry::get_reputation_address(registry, user)
-}
-
-public fun get_active_task_ids(registry: &TaskRegistry, start_index: u64, limit: u64): vector<u64> {
-    registry::get_active_task_ids(registry, start_index, limit)
-}
-
-public fun get_all_task_ids(registry: &TaskRegistry, start_id: u64, limit: u64): vector<u64> {
-    registry::get_all_task_ids(registry, start_id, limit)
-}
-
-// === Test-only Functions ===
-
-#[test_only]
-public fun init_for_testing(ctx: &mut TxContext) {
-    init(ctx);
+public fun is_batch_complete(batch: &PayoutBatch): bool {
+    batch.processed_count >= batch.total_recipients
 }
