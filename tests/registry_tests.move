@@ -7,6 +7,7 @@ use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::UserProfile;
 use songsim::task::Task;
 use songsim::registry::{Self, TaskRegistry};
+use sui::object;
 use songsim::test_helpers::{Self, begin_test, end_test};
 use sui::test_scenario as ts;
 
@@ -203,15 +204,20 @@ fun test_deregister_task_on_completion() {
         ts::return_shared(config);
     };
 
-    // Cancel task (which should deregister it)
+    // Cancel task (which should deregister it and update registry)
     ts::next_tx(&mut scenario, test_helpers::requester());
     {
         let mut task = ts::take_shared<Task>(&scenario);
+        let mut registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut requester_profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::cancel_task(&mut task, &clock, ts::ctx(&mut scenario));
+        songsim::cancel_task(&mut registry, &mut task, &mut requester_profile, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
+        ts::return_shared(requester_profile);
+        ts::return_shared(registry);
         ts::return_shared(task);
     };
 

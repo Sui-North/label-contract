@@ -5,8 +5,9 @@ use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::UserProfile;
-use songsim::task::Task;
+use songsim::task::{Self, Task};
 use songsim::registry::{Self, TaskRegistry};
+use sui::object;
 use songsim::test_helpers::{Self, begin_test, end_test};
 use sui::test_scenario as ts;
 
@@ -103,14 +104,22 @@ fun test_profile_stats_increment_with_submissions() {
     ts::next_tx(&mut scenario, test_helpers::labeler1());
     {
         let mut task = ts::take_shared<Task>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::labeler1());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
+        
+        // Get quality tracker
+        let task_id = task::get_task_id(&task);
+        let quality_tracker_addr = registry::get_quality_tracker_address(&registry, task_id);
+        let mut quality_tracker = ts::take_shared_by_id(&scenario, object::id_from_address(quality_tracker_addr));
+        
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
+        songsim::submit_labels(&mut registry, &mut task, &mut profile, &mut quality_tracker, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(quality_tracker);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(task);
     };

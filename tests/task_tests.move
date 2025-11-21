@@ -5,8 +5,9 @@ use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::UserProfile;
-use songsim::task::{Task, Submission};
-use songsim::registry::TaskRegistry;
+use songsim::task::{Self, Task, Submission};
+use songsim::registry::{Self, TaskRegistry};
+use sui::object;
 use songsim::test_helpers::{Self, begin_test, end_test};
 use songsim::constants;
 use sui::test_scenario as ts;
@@ -49,7 +50,8 @@ fun test_create_task_with_valid_params() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
@@ -71,7 +73,7 @@ fun test_create_task_with_valid_params() {
         );
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
@@ -120,7 +122,8 @@ fun test_cannot_create_task_with_past_deadline() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let mut clock = test_helpers::create_clock(ts::ctx(&mut scenario));
         
@@ -145,7 +148,7 @@ fun test_cannot_create_task_with_past_deadline() {
         );
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
@@ -188,7 +191,8 @@ fun test_cannot_create_task_with_insufficient_bounty() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(100, ts::ctx(&mut scenario)); // Too small
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
@@ -210,7 +214,7 @@ fun test_cannot_create_task_with_insufficient_bounty() {
         );
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
@@ -249,14 +253,15 @@ fun test_submit_labels() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
         songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
@@ -279,22 +284,33 @@ fun test_submit_labels() {
     ts::next_tx(&mut scenario, test_helpers::labeler1());
     {
         let mut task = ts::take_shared<Task>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::labeler1());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
+        
+        // Get quality tracker from registry
+        let task_id = task::get_task_id(&task);
+        let quality_tracker_addr = registry::get_quality_tracker_address(&registry, task_id);
+        let mut quality_tracker = ts::take_shared_by_id(&scenario, object::id_from_address(quality_tracker_addr));
+        
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
+        songsim::submit_labels(&mut registry, &mut task, &mut profile, &mut quality_tracker, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(quality_tracker);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(task);
     };
 
-    // Verify submission created
+    // Verify submission created in registry
     ts::next_tx(&mut scenario, test_helpers::labeler1());
     {
-        assert!(ts::has_most_recent_for_sender<Submission>(&scenario), 0);
+        let registry = ts::take_shared<TaskRegistry>(&scenario);
+        let exists = registry::submission_exists(&registry, 1); // First submission ID is 1
+        assert!(exists, 0);
+        ts::return_shared(registry);
     };
 
     end_test(scenario);
@@ -327,14 +343,15 @@ fun test_cannot_submit_after_deadline() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
         songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, 10000, bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
@@ -357,17 +374,25 @@ fun test_cannot_submit_after_deadline() {
     ts::next_tx(&mut scenario, test_helpers::labeler1());
     {
         let mut task = ts::take_shared<Task>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::labeler1());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
+        
+        // Get quality tracker
+        let task_id = task::get_task_id(&task);
+        let quality_tracker_addr = registry::get_quality_tracker_address(&registry, task_id);
+        let mut quality_tracker = ts::take_shared_by_id(&scenario, object::id_from_address(quality_tracker_addr));
+        
         let mut clock = test_helpers::create_clock(ts::ctx(&mut scenario));
         
         // Advance clock past deadline
         test_helpers::set_clock_timestamp(&mut clock, 20000);
 
-        songsim::submit_labels(&mut registry, &mut task, &mut profile, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
+        songsim::submit_labels(&mut registry, &mut task, &mut profile, &mut quality_tracker, string::utf8(b"labels_url"), string::utf8(b"labels.json"), string::utf8(b"application/json"), &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(quality_tracker);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(task);
     };
@@ -403,14 +428,15 @@ fun test_cancel_task_with_no_submissions() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
         songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
@@ -419,11 +445,16 @@ fun test_cancel_task_with_no_submissions() {
     ts::next_tx(&mut scenario, test_helpers::requester());
     {
         let mut task = ts::take_shared<Task>(&scenario);
+        let mut registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut requester_profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::cancel_task(&mut task, &clock, ts::ctx(&mut scenario));
+        songsim::cancel_task(&mut registry, &mut task, &mut requester_profile, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
+        ts::return_shared(requester_profile);
+        ts::return_shared(registry);
         ts::return_shared(task);
     };
 
@@ -457,27 +488,33 @@ fun test_only_requester_can_cancel_task() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
         songsim::create_task(&mut registry, &mut config, &mut profile, string::utf8(b"ds"), string::utf8(b"d.csv"), string::utf8(b"text/csv"), string::utf8(b"T"), string::utf8(b"D"), string::utf8(b"I"), 2, test_helpers::future_deadline(), bounty, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
 
-    // Try to cancel as different user
+    // Try to cancel as different user (should fail with EUnauthorized)
     ts::next_tx(&mut scenario, test_helpers::labeler1());
     {
         let mut task = ts::take_shared<Task>(&scenario);
+        let mut registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut requester_profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
-        songsim::cancel_task(&mut task, &clock, ts::ctx(&mut scenario));
+        songsim::cancel_task(&mut registry, &mut task, &mut requester_profile, &clock, ts::ctx(&mut scenario));
 
         test_helpers::destroy_clock(clock);
+        ts::return_shared(requester_profile);
+        ts::return_shared(registry);
         ts::return_shared(task);
     };
 

@@ -5,7 +5,7 @@ module songsim::reputation;
 use songsim::constants;
 use songsim::events;
 
-/// Reputation tracking with weighted scoring and badges
+/// Reputation tracking with weighted scoring and badges (SHARED OBJECT)
 public struct Reputation has key, store {
     id: UID,
     user: address,
@@ -47,6 +47,15 @@ public(package) fun create(user: address, created_at: u64, ctx: &mut TxContext):
 public fun update_simple(reputation: &mut Reputation, accepted: bool, ctx: &TxContext) {
     assert!(reputation.user == ctx.sender(), constants::e_unauthorized());
     update_internal(reputation, accepted, ctx.epoch_timestamp_ms());
+}
+
+/// Update reputation from consensus (no authorization check - package internal)
+public(package) fun update_from_consensus(
+    reputation: &mut Reputation,
+    accepted: bool,
+    current_time: u64,
+) {
+    update_internal(reputation, accepted, current_time);
 }
 
 /// Update reputation with weighted scoring

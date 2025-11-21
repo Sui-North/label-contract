@@ -19,6 +19,8 @@ use songsim::staking::{Self, LabelerStake};
 use songsim::task::{Self, Task, Submission};
 use songsim::consensus::{ConsensusResult, PayoutBatch};
 use songsim::migration::{Self, MigrationState};
+use songsim::quality::{Self, QualityTracker};
+use songsim::batch_updates;
 
 // === Platform Core Structs ===
 
@@ -161,8 +163,7 @@ public fun rollback_platform_migration(
 
 // === Profile Management ===
 
-/// Create user profile
-#[allow(lint(self_transfer))]
+/// Create user profile (Profile and Reputation are now SHARED objects)
 public fun create_profile(
     registry: &mut TaskRegistry,
     config: &mut PlatformConfig,
@@ -201,14 +202,14 @@ public fun create_profile(
 
     events::emit_profile_created(profile_addr, sender, user_type, created_at);
 
-    // Transfer objects to owner
-    transfer::public_transfer(user_profile, sender);
-    transfer::public_transfer(user_reputation, sender);
+    // Share objects (not transfer) so they can be accessed/updated by consensus
+    transfer::public_share_object(user_profile);
+    transfer::public_share_object(user_reputation);
 }
 
 // === Task Management ===
 
-/// Create new labeling task
+/// Create new labeling task (with quality tracker)
 public fun create_task(
     registry: &mut TaskRegistry,
     config: &mut PlatformConfig,
@@ -264,6 +265,11 @@ public fun create_task(
     let task_addr = object::id_address(&new_task);
     registry::confirm_task_registration(registry, task_id, task_addr);
     
+    // NEW: Create quality tracker for this task
+    let quality_tracker = quality::create_tracker(task_id, ctx);
+    let tracker_addr = object::id_address(&quality_tracker);
+    registry::register_quality_tracker(registry, task_id, tracker_addr);
+    
     // Update profile stats
     profile::increment_tasks_created(user_profile);
     config.total_tasks = config.total_tasks + 1;
@@ -272,14 +278,15 @@ public fun create_task(
 
     // Make task a shared object so labelers can submit to it
     transfer::public_share_object(new_task);
+    transfer::public_share_object(quality_tracker);
 }
 
-/// Submit labels for a task
-#[allow(lint(self_transfer))]
+/// Submit labels for a task (with quality metrics recording)
 public fun submit_labels(
     registry: &mut TaskRegistry,
     labeling_task: &mut Task,
     user_profile: &mut UserProfile,
+    quality_tracker: &mut QualityTracker,
     result_url: String,
     result_filename: String,
     result_content_type: String,
@@ -293,11 +300,13 @@ public fun submit_labels(
     task::validate_submission(&result_url, status, deadline, clock);
 
     let submitted_at = clock::timestamp_ms(clock);
+    let task_id = task::get_task_id(labeling_task);
+    let task_created_at = task::get_created_at(labeling_task);
     
     // Create submission
     let new_submission = task::create_submission(
         0, // Temporary, will be set by registry
-        task::get_task_id(labeling_task),
+        task_id,
         ctx.sender(),
         result_url,
         result_filename,
@@ -312,16 +321,52 @@ public fun submit_labels(
     // Update task and profile (checks for duplicates internally)
     task::add_submission(labeling_task, submission_id, ctx.sender());
     profile::increment_submissions_count(user_profile);
+    
+    // NEW: Record quality metrics
+    let completion_time = submitted_at - task_created_at;
+    quality::record_metrics(
+        quality_tracker,
+        submission_id,
+        task_id,
+        ctx.sender(),
+        completion_time,
+    );
 
-    events::emit_submission_received(submission_id, task::get_task_id(labeling_task), ctx.sender(), submitted_at);
+    events::emit_submission_received(submission_id, task_id, ctx.sender(), submitted_at);
 
-    // Transfer submission to labeler
-    transfer::public_transfer(new_submission, ctx.sender());
+    // Share submission (not transfer) so it can be updated during consensus
+    transfer::public_share_object(new_submission);
 }
 
-/// Cancel task and refund bounty (only if no submissions)
-entry fun cancel_task(labeling_task: &mut Task, clock: &Clock, ctx: &mut TxContext) {
+/// Cancel task and refund bounty (only if no submissions) - with registry and profile updates
+entry fun cancel_task(
+    registry: &mut TaskRegistry,
+    labeling_task: &mut Task,
+    requester_profile: &mut UserProfile,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    assert!(profile::get_owner(requester_profile) == ctx.sender(), constants::e_unauthorized());
+    
+    let task_id = task::get_task_id(labeling_task);
+    let old_status = task::get_status(labeling_task);
+    
     let refund_coin = task::cancel_task(labeling_task, clock, ctx);
+    
+    // NEW: Mark task inactive in registry
+    registry::mark_task_inactive(registry, task_id);
+    
+    // NEW: Update profile stats
+    profile::increment_tasks_cancelled(requester_profile);
+    
+    // NEW: Emit status change event
+    events::emit_task_status_changed(
+        task_id,
+        old_status,
+        constants::status_cancelled(),
+        clock::timestamp_ms(clock),
+    );
+    
     transfer::public_transfer(refund_coin, ctx.sender());
 }
 
@@ -332,22 +377,30 @@ public fun extend_deadline(labeling_task: &mut Task, new_deadline: u64, clock: &
 
 // === Consensus & Payout ===
 
-/// Execute consensus with AUTOMATED bounty distribution (ESCROW PROTECTION)
+/// Execute consensus with AUTOMATED bounty distribution and ALL LIFECYCLE UPDATES
 #[allow(lint(self_transfer))]
 public fun finalize_consensus(
     config: &PlatformConfig,
+    registry: &mut TaskRegistry,
     labeling_task: &mut Task,
+    requester_profile: &mut UserProfile,
+    quality_tracker: &mut QualityTracker,
     accepted_submission_ids: vector<u64>,
     accepted_labelers: vector<address>,
     rejected_submission_ids: vector<u64>,
+    rejected_labelers: vector<address>,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
     let consensus_result = consensus::finalize_consensus(
+        registry,
         labeling_task,
+        requester_profile,
         accepted_submission_ids,
         accepted_labelers,
         rejected_submission_ids,
+        rejected_labelers,
+        quality_tracker,
         config.fee_bps,
         config.fee_recipient,
         clock,
@@ -397,6 +450,51 @@ public fun update_submission_status(
         is_accepted,
         clock::timestamp_ms(clock),
         ctx.sender(),
+    );
+}
+
+// === Batch Update Functions (Post-Consensus) ===
+
+/// Update accepted labeler's profile and reputation after consensus
+public fun update_accepted_labeler(
+    profile: &mut UserProfile,
+    reputation: &mut Reputation,
+    earned_amount: u64,
+    clock: &Clock,
+) {
+    batch_updates::update_accepted_labeler(
+        profile,
+        reputation,
+        earned_amount,
+        clock::timestamp_ms(clock),
+    );
+}
+
+/// Update rejected labeler's profile and reputation after consensus
+public fun update_rejected_labeler(
+    profile: &mut UserProfile,
+    reputation: &mut Reputation,
+    clock: &Clock,
+) {
+    batch_updates::update_rejected_labeler(
+        profile,
+        reputation,
+        clock::timestamp_ms(clock),
+    );
+}
+
+/// Update submission status after consensus (batch-friendly)
+public fun update_submission_after_consensus(
+    submission: &mut Submission,
+    task: &Task,
+    is_accepted: bool,
+    clock: &Clock,
+) {
+    batch_updates::update_submission_after_consensus(
+        submission,
+        task,
+        is_accepted,
+        clock::timestamp_ms(clock),
     );
 }
 
@@ -561,7 +659,7 @@ public fun join_prize_pool(pool: &mut PrizePool, clock: &Clock, ctx: &TxContext)
 // === View Functions (delegate to sub-modules) ===
 
 // Profile
-public fun get_profile_stats(user_profile: &UserProfile): (u64, u64) {
+public fun get_profile_stats(user_profile: &UserProfile): (u64, u64, u64, u64, u64, u64, u64) {
     profile::get_stats(user_profile)
 }
 

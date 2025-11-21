@@ -5,7 +5,8 @@ use std::string;
 
 use songsim::songsim::{Self, PlatformConfig};
 use songsim::profile::{Self, UserProfile};
-use songsim::registry::TaskRegistry;
+use songsim::registry::{Self, TaskRegistry};
+use sui::object;
 use songsim::test_helpers::{Self, begin_test, end_test};
 use songsim::constants;
 use sui::test_scenario as ts;
@@ -42,12 +43,13 @@ fun test_create_requester_profile() {
         ts::return_shared(config);
     };
 
-    // Verify profile was created
+    // Verify profile was created in registry
     ts::next_tx(&mut scenario, test_helpers::requester());
     {
-        assert!(ts::has_most_recent_for_sender<UserProfile>(&scenario), 0);
-        let profile = ts::take_from_sender<UserProfile>(&scenario);
-        ts::return_to_sender(&scenario, profile);
+        let registry = ts::take_shared<TaskRegistry>(&scenario);
+        let exists = registry::profile_exists(&registry, test_helpers::requester());
+        assert!(exists, 0);
+        ts::return_shared(registry);
     };
 
     end_test(scenario);
@@ -85,7 +87,10 @@ fun test_create_labeler_profile() {
 
     ts::next_tx(&mut scenario, test_helpers::labeler1());
     {
-        assert!(ts::has_most_recent_for_sender<UserProfile>(&scenario), 0);
+        let registry = ts::take_shared<TaskRegistry>(&scenario);
+        let exists = registry::profile_exists(&registry, test_helpers::labeler1());
+        assert!(exists, 0);
+        ts::return_shared(registry);
     };
 
     end_test(scenario);
@@ -185,10 +190,12 @@ fun test_update_profile() {
         ts::return_shared(config);
     };
 
-    // Update profile
+    // Update profile (now via registry)
     ts::next_tx(&mut scenario, test_helpers::requester());
     {
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
 
         profile::update(
             &mut profile,
@@ -198,7 +205,8 @@ fun test_update_profile() {
             ts::ctx(&mut scenario),
         );
 
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
+        ts::return_shared(registry);
     };
 
     end_test(scenario);
@@ -235,14 +243,17 @@ fun test_update_user_type() {
         ts::return_shared(config);
     };
 
-    // Update to labeler type
+    // Update to labeler type (now via registry)
     ts::next_tx(&mut scenario, test_helpers::requester());
     {
-        let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+        let registry = ts::take_shared<TaskRegistry>(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
 
         profile::update_user_type(&mut profile, 2, ts::ctx(&mut scenario)); // Labeler
 
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
+        ts::return_shared(registry);
     };
 
     end_test(scenario);

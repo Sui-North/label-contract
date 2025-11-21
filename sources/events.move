@@ -42,6 +42,13 @@ public struct TaskDeadlineExtended has copy, drop {
     timestamp: u64,
 }
 
+public struct TaskStatusChanged has copy, drop {
+    task_id: u64,
+    old_status: u8,
+    new_status: u8,
+    timestamp: u64,
+}
+
 // === Submission Events ===
 
 public struct SubmissionReceived has copy, drop {
@@ -55,6 +62,15 @@ public struct SubmissionRejected has copy, drop {
     submission_id: u64,
     task_id: u64,
     labeler: address,
+    timestamp: u64,
+}
+
+public struct SubmissionStatusChanged has copy, drop {
+    submission_id: u64,
+    task_id: u64,
+    labeler: address,
+    old_status: u8,
+    new_status: u8,
     timestamp: u64,
 }
 
@@ -94,11 +110,26 @@ public struct BadgeEarned has copy, drop {
     timestamp: u64,
 }
 
+public struct QualityMetricsRecorded has copy, drop {
+    submission_id: u64,
+    task_id: u64,
+    labeler: address,
+    agreement_score: u64,
+    completion_time: u64,
+}
+
 // === Platform Config Events ===
 
 public struct PlatformConfigUpdated has copy, drop {
     fee_bps: u64,
     fee_recipient: address,
+}
+
+public struct ProfileStatsUpdated has copy, drop {
+    user: address,
+    tasks_completed: u64,
+    submissions_accepted: u64,
+    total_earned: u64,
 }
 
 // === Dispute Events ===
@@ -167,12 +198,20 @@ public(package) fun emit_task_deadline_extended(task_id: u64, requester: address
     event::emit(TaskDeadlineExtended { task_id, requester, old_deadline, new_deadline, timestamp });
 }
 
+public(package) fun emit_task_status_changed(task_id: u64, old_status: u8, new_status: u8, timestamp: u64) {
+    event::emit(TaskStatusChanged { task_id, old_status, new_status, timestamp });
+}
+
 public(package) fun emit_submission_received(submission_id: u64, task_id: u64, labeler: address, timestamp: u64) {
     event::emit(SubmissionReceived { submission_id, task_id, labeler, timestamp });
 }
 
 public(package) fun emit_submission_rejected(submission_id: u64, task_id: u64, labeler: address, timestamp: u64) {
     event::emit(SubmissionRejected { submission_id, task_id, labeler, timestamp });
+}
+
+public(package) fun emit_submission_status_changed(submission_id: u64, task_id: u64, labeler: address, old_status: u8, new_status: u8, timestamp: u64) {
+    event::emit(SubmissionStatusChanged { submission_id, task_id, labeler, old_status, new_status, timestamp });
 }
 
 public(package) fun emit_consensus_finalized(task_id: u64, accepted_count: u64, rejected_count: u64) {
@@ -195,8 +234,16 @@ public(package) fun emit_badge_earned(user: address, badge_id: u8, badge_name: v
     event::emit(BadgeEarned { user, badge_id, badge_name, timestamp });
 }
 
+public(package) fun emit_quality_metrics_recorded(submission_id: u64, task_id: u64, labeler: address, agreement_score: u64, completion_time: u64) {
+    event::emit(QualityMetricsRecorded { submission_id, task_id, labeler, agreement_score, completion_time });
+}
+
 public(package) fun emit_platform_config_updated(fee_bps: u64, fee_recipient: address) {
     event::emit(PlatformConfigUpdated { fee_bps, fee_recipient });
+}
+
+public(package) fun emit_profile_stats_updated(user: address, tasks_completed: u64, submissions_accepted: u64, total_earned: u64) {
+    event::emit(ProfileStatsUpdated { user, tasks_completed, submissions_accepted, total_earned });
 }
 
 public(package) fun emit_dispute_created(dispute_id: u64, task_id: u64, submission_id: u64, disputer: address, timestamp: u64) {

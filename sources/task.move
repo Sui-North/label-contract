@@ -35,7 +35,7 @@ public struct Task has key, store {
     labeler_addresses: VecSet<address>, // Track unique labelers to prevent duplicates
 }
 
-/// Submission record
+/// Submission record (SHARED OBJECT)
 public struct Submission has key, store {
     id: UID,
     submission_id: u64,
@@ -293,10 +293,50 @@ public fun update_submission_status(
     };
 }
 
+/// Update submission status from consensus (no authorization check - package internal)
+public(package) fun update_submission_status_internal(
+    submission: &mut Submission,
+    task: &Task,
+    is_accepted: bool,
+    reviewed_at: u64,
+) {
+    assert!(submission.task_id == task.task_id, constants::e_task_not_found());
+    assert!(task.status == constants::status_completed(), constants::e_task_not_completed());
+
+    submission.status = if (is_accepted) {
+        constants::submission_status_accepted()
+    } else {
+        constants::submission_status_rejected()
+    };
+    submission.reviewed_at = reviewed_at;
+
+    events::emit_submission_status_changed(
+        submission.submission_id,
+        submission.task_id,
+        submission.labeler,
+        constants::submission_status_pending(),
+        submission.status,
+        reviewed_at,
+    );
+
+    if (!is_accepted) {
+        events::emit_submission_rejected(
+            submission.submission_id,
+            submission.task_id,
+            submission.labeler,
+            reviewed_at,
+        );
+    };
+}
+
 // === View Functions ===
 
 public fun get_task_id(task: &Task): u64 {
     task.task_id
+}
+
+public fun get_created_at(task: &Task): u64 {
+    task.created_at
 }
 
 public fun get_requester(task: &Task): address {
@@ -378,6 +418,10 @@ public fun get_submission_details(submission: &Submission): (
 
 public fun get_submission_labeler(submission: &Submission): address {
     submission.labeler
+}
+
+public fun get_submission_id(submission: &Submission): u64 {
+    submission.submission_id
 }
 
 public fun get_submission_task_id(submission: &Submission): u64 {

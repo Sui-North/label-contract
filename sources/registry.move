@@ -5,6 +5,9 @@ module songsim::registry;
 use sui::table::{Self, Table};
 use sui::vec_map::{Self, VecMap};
 use songsim::constants;
+use songsim::profile::UserProfile;
+use songsim::reputation::Reputation;
+use songsim::quality::QualityTracker;
 
 /// Global registry for lookups (shared object)
 public struct TaskRegistry has key {
@@ -12,10 +15,11 @@ public struct TaskRegistry has key {
     version: u64, // Schema version for migrations
     tasks: Table<u64, address>, // task_id -> Task object address
     submissions: Table<u64, address>, // submission_id -> Submission object address
-    profiles: Table<address, address>, // user address -> UserProfile object address
-    reputations: Table<address, address>, // user address -> Reputation object address
+    profiles: Table<address, address>, // user address -> UserProfile object address (shared)
+    reputations: Table<address, address>, // user address -> Reputation object address (shared)
     disputes: Table<u64, address>, // dispute_id -> Dispute object address
     prize_pools: Table<u64, address>, // pool_id -> PrizePool object address
+    quality_trackers: Table<u64, address>, // task_id -> QualityTracker object address
     
     // Optimized lookup: active task IDs for efficient iteration
     active_task_ids: VecMap<u64, bool>, // task_id -> is_active
@@ -39,6 +43,7 @@ public fun create(ctx: &mut TxContext): TaskRegistry {
         reputations: table::new(ctx),
         disputes: table::new(ctx),
         prize_pools: table::new(ctx),
+        quality_trackers: table::new(ctx),
         active_task_ids: vec_map::empty(),
         next_task_id: 1,
         next_submission_id: 1,
@@ -179,6 +184,12 @@ public(package) fun register_prize_pool(registry: &mut TaskRegistry, pool_addr: 
     pool_id
 }
 
+// === Quality Tracker Registration ===
+
+public(package) fun register_quality_tracker(registry: &mut TaskRegistry, task_id: u64, tracker_addr: address) {
+    table::add(&mut registry.quality_trackers, task_id, tracker_addr);
+}
+
 // === View Functions ===
 
 /// Get active task IDs (much more efficient than iterating all tasks)
@@ -249,6 +260,10 @@ public fun prize_pool_exists(registry: &TaskRegistry, pool_id: u64): bool {
     table::contains(&registry.prize_pools, pool_id)
 }
 
+public fun quality_tracker_exists(registry: &TaskRegistry, task_id: u64): bool {
+    table::contains(&registry.quality_trackers, task_id)
+}
+
 /// Get addresses from registry
 public fun get_task_address(registry: &TaskRegistry, task_id: u64): address {
     assert!(table::contains(&registry.tasks, task_id), constants::e_task_not_found());
@@ -278,6 +293,11 @@ public fun get_dispute_address(registry: &TaskRegistry, dispute_id: u64): addres
 public fun get_prize_pool_address(registry: &TaskRegistry, pool_id: u64): address {
     assert!(table::contains(&registry.prize_pools, pool_id), constants::e_prize_pool_not_found());
     *table::borrow(&registry.prize_pools, pool_id)
+}
+
+public fun get_quality_tracker_address(registry: &TaskRegistry, task_id: u64): address {
+    assert!(table::contains(&registry.quality_trackers, task_id), constants::e_task_not_found());
+    *table::borrow(&registry.quality_trackers, task_id)
 }
 
 /// Get next IDs

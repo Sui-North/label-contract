@@ -4,6 +4,7 @@ module songsim::quality;
 
 use sui::vec_map::{Self, VecMap};
 use songsim::task::{Self, Submission};
+use songsim::events;
 
 /// Quality metrics for a submission
 public struct QualityMetrics has store, drop, copy {
@@ -13,7 +14,7 @@ public struct QualityMetrics has store, drop, copy {
     flagged_by_peers: u64,
 }
 
-/// Submission quality tracking
+/// Submission quality tracking (SHARED OBJECT)
 public struct QualityTracker has key, store {
     id: UID,
     task_id: u64,
@@ -38,6 +39,8 @@ public(package) fun create_tracker(
 public(package) fun record_metrics(
     tracker: &mut QualityTracker,
     submission_id: u64,
+    task_id: u64,
+    labeler: address,
     completion_time: u64,
 ) {
     let metrics = QualityMetrics {
@@ -48,6 +51,15 @@ public(package) fun record_metrics(
     };
     
     vec_map::insert(&mut tracker.metrics, submission_id, metrics);
+    
+    // Emit event
+    events::emit_quality_metrics_recorded(
+        submission_id,
+        task_id,
+        labeler,
+        0, // Agreement score calculated later
+        completion_time,
+    );
 }
 
 /// Calculate inter-labeler agreement score
