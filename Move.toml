@@ -1,11 +1,11 @@
 [package]
 name = "songsim"
-version = "2.0.0"
+version = "3.1.0"
 edition = "2024.beta"
 license = "MIT"
 authors = ["Songsim Core Team"]
 
-published-at = "0xe92d9bf5a82568d6c994917c88606eedd97374c978367a233c3fe33955534dea"
+published-at = "0xe26690f7c4c45ee7ceedee6dceb2b269ab49581a2b9844ff1ca382fe8415757d"
 
 [dependencies]
 
