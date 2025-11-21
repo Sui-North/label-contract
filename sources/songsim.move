@@ -500,7 +500,7 @@ public fun update_submission_after_consensus(
 /// Accepts up to 5 submissions at a time (transaction limit considerations)
 /// Pass submissions in order: accepted first, then rejected
 /// Use acceptance_flags to indicate which are accepted (true) vs rejected (false)
-entry fun batch_update_submissions(
+entry fun batch_update_submissions_5(
     s1: &mut Submission,
     s2: &mut Submission,
     s3: &mut Submission,
@@ -527,6 +527,82 @@ entry fun batch_update_submissions(
     if (len > 4) {
         task::update_submission_status_internal(s5, *vector::borrow(&acceptance_flags, 4), current_time);
     };
+}
+
+/// Batch update 4 submissions
+entry fun batch_update_submissions_4(
+    s1: &mut Submission,
+    s2: &mut Submission,
+    s3: &mut Submission,
+    s4: &mut Submission,
+    acceptance_flags: vector<bool>,
+    clock: &Clock,
+) {
+    let current_time = clock::timestamp_ms(clock);
+    let len = vector::length(&acceptance_flags);
+    
+    if (len > 0) {
+        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+    };
+    if (len > 1) {
+        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+    };
+    if (len > 2) {
+        task::update_submission_status_internal(s3, *vector::borrow(&acceptance_flags, 2), current_time);
+    };
+    if (len > 3) {
+        task::update_submission_status_internal(s4, *vector::borrow(&acceptance_flags, 3), current_time);
+    };
+}
+
+/// Batch update 3 submissions
+entry fun batch_update_submissions_3(
+    s1: &mut Submission,
+    s2: &mut Submission,
+    s3: &mut Submission,
+    acceptance_flags: vector<bool>,
+    clock: &Clock,
+) {
+    let current_time = clock::timestamp_ms(clock);
+    let len = vector::length(&acceptance_flags);
+    
+    if (len > 0) {
+        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+    };
+    if (len > 1) {
+        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+    };
+    if (len > 2) {
+        task::update_submission_status_internal(s3, *vector::borrow(&acceptance_flags, 2), current_time);
+    };
+}
+
+/// Batch update 2 submissions
+entry fun batch_update_submissions_2(
+    s1: &mut Submission,
+    s2: &mut Submission,
+    acceptance_flags: vector<bool>,
+    clock: &Clock,
+) {
+    let current_time = clock::timestamp_ms(clock);
+    let len = vector::length(&acceptance_flags);
+    
+    if (len > 0) {
+        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+    };
+    if (len > 1) {
+        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+    };
+}
+
+/// Batch update 1 submission
+entry fun batch_update_submissions_1(
+    s1: &mut Submission,
+    is_accepted: bool,
+    clock: &Clock,
+) {
+    let current_time = clock::timestamp_ms(clock);
+    task::update_submission_status_internal(s1, is_accepted, current_time);
 }
 
 // === Batch Processing for Large Tasks ===
