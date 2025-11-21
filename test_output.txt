@@ -1,0 +1,568 @@
+INCLUDING DEPENDENCY Bridge
+INCLUDING DEPENDENCY SuiSystem
+INCLUDING DEPENDENCY Sui
+INCLUDING DEPENDENCY MoveStdlib
+BUILDING songsim
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\quality.move:107:5
+    [0m[36m│[0m
+[0m[36m107[0m [0m[36m│[0m     [0m[33mctx[0m: &TxContext,
+    [0m[36m│[0m     [0m[33m^^^[0m [0m[33mUnused parameter 'ctx'. Consider removing or prefixing with an underscore: '_ctx'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\access_policy.move:7:14
+  [0m[36m│[0m
+[0m[36m7[0m [0m[36m│[0m use songsim::[0m[33mconstants[0m;
+  [0m[36m│[0m              [0m[33m^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'constants'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[36m┌─[0m .\sources\access_policy.move:10:7
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m const [0m[33mENotAuthorized[0m: u64 = 1;
+   [0m[36m│[0m       [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'ENotAuthorized' is never used. Consider removing it.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[36m┌─[0m .\sources\access_policy.move:11:7
+   [0m[36m│[0m
+[0m[36m11[0m [0m[36m│[0m const [0m[33mETaskNotFound[0m: u64 = 2;
+   [0m[36m│[0m       [0m[33m^^^^^^^^^^^^^[0m [0m[33mThe constant 'ETaskNotFound' is never used. Consider removing it.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[36m┌─[0m .\sources\access_policy.move:12:7
+   [0m[36m│[0m
+[0m[36m12[0m [0m[36m│[0m const [0m[33mESubmissionNotFound[0m: u64 = 3;
+   [0m[36m│[0m       [0m[33m^^^^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'ESubmissionNotFound' is never used. Consider removing it.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\tests\registry_tests.move:4:32
+  [0m[36m│[0m
+[0m[36m4[0m [0m[36m│[0m use songsim::consensus::{Self, [0m[33mConsensusResult[0m, PayoutBatch};
+  [0m[36m│[0m                                [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'ConsensusResult'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\tests\registry_tests.move:10:24
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use songsim::quality::{[0m[33mSelf[0m, QualityTracker};
+   [0m[36m│[0m                        [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'quality'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\consensus.move:6:23
+  [0m[36m│[0m
+[0m[36m6[0m [0m[36m│[0m use sui::coin::{Self, [0m[33mCoin[0m};
+  [0m[36m│[0m                       [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'Coin'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\consensus.move:7:15
+  [0m[36m│[0m
+[0m[36m7[0m [0m[36m│[0m use sui::sui::[0m[33mSUI[0m;
+  [0m[36m│[0m               [0m[33m^^^[0m [0m[33mUnused 'use' of alias 'SUI'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\sources\consensus.move:10:33
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use songsim::task::{Self, Task, [0m[33mSubmission[0m};
+   [0m[36m│[0m                                 [0m[33m^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'Submission'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\sources\consensus.move:12:27
+   [0m[36m│[0m
+[0m[36m12[0m [0m[36m│[0m use songsim::reputation::{[0m[33mSelf[0m, Reputation};
+   [0m[36m│[0m                           [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'reputation'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\sources\consensus.move:12:33
+   [0m[36m│[0m
+[0m[36m12[0m [0m[36m│[0m use songsim::reputation::{Self, [0m[33mReputation[0m};
+   [0m[36m│[0m                                 [0m[33m^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'Reputation'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\sources\consensus.move:14:24
+   [0m[36m│[0m
+[0m[36m14[0m [0m[36m│[0m use songsim::quality::{[0m[33mSelf[0m, QualityTracker};
+   [0m[36m│[0m                        [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'quality'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+   [0m[36m┌─[0m .\sources\consensus.move:53:5
+   [0m[36m│[0m
+[0m[36m53[0m [0m[36m│[0m     [0m[33mquality_tracker[0m: &mut QualityTracker,
+   [0m[36m│[0m     [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mUnused parameter 'quality_tracker'. Consider removing or prefixing with an underscore: '_quality_tracker'[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:114:13
+    [0m[36m│[0m
+[0m[36m114[0m [0m[36m│[0m         let [0m[33msubmission_id[0m = *vector::borrow(&accepted_submission_ids, i);
+    [0m[36m│[0m             [0m[33m^^^^^^^^^^^^^[0m [0m[33mUnused local variable 'submission_id'. Consider removing or prefixing with an underscore: '_submission_id'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:369:5
+    [0m[36m│[0m
+[0m[36m369[0m [0m[36m│[0m     [0m[33mregistry[0m: &TaskRegistry,
+    [0m[36m│[0m     [0m[33m^^^^^^^^[0m [0m[33mUnused parameter 'registry'. Consider removing or prefixing with an underscore: '_registry'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:370:5
+    [0m[36m│[0m
+[0m[36m370[0m [0m[36m│[0m     [0m[33mlabeler[0m: address,
+    [0m[36m│[0m     [0m[33m^^^^^^^[0m [0m[33mUnused parameter 'labeler'. Consider removing or prefixing with an underscore: '_labeler'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:371:5
+    [0m[36m│[0m
+[0m[36m371[0m [0m[36m│[0m     [0m[33mearned_amount[0m: u64,
+    [0m[36m│[0m     [0m[33m^^^^^^^^^^^^^[0m [0m[33mUnused parameter 'earned_amount'. Consider removing or prefixing with an underscore: '_earned_amount'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:372:5
+    [0m[36m│[0m
+[0m[36m372[0m [0m[36m│[0m     [0m[33mcurrent_time[0m: u64,
+    [0m[36m│[0m     [0m[33m^^^^^^^^^^^^[0m [0m[33mUnused parameter 'current_time'. Consider removing or prefixing with an underscore: '_current_time'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:381:5
+    [0m[36m│[0m
+[0m[36m381[0m [0m[36m│[0m     [0m[33mregistry[0m: &TaskRegistry,
+    [0m[36m│[0m     [0m[33m^^^^^^^^[0m [0m[33mUnused parameter 'registry'. Consider removing or prefixing with an underscore: '_registry'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:382:5
+    [0m[36m│[0m
+[0m[36m382[0m [0m[36m│[0m     [0m[33mlabeler[0m: address,
+    [0m[36m│[0m     [0m[33m^^^^^^^[0m [0m[33mUnused parameter 'labeler'. Consider removing or prefixing with an underscore: '_labeler'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+    [0m[36m┌─[0m .\sources\consensus.move:383:5
+    [0m[36m│[0m
+[0m[36m383[0m [0m[36m│[0m     [0m[33mcurrent_time[0m: u64,
+    [0m[36m│[0m     [0m[33m^^^^^^^^^^^^[0m [0m[33mUnused parameter 'current_time'. Consider removing or prefixing with an underscore: '_current_time'[0m
+    [0m[36m│[0m
+    [0m[36m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\batch_updates.move:5:25
+  [0m[36m│[0m
+[0m[36m5[0m [0m[36m│[0m use songsim::registry::{[0m[33mSelf[0m, TaskRegistry};
+  [0m[36m│[0m                         [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'registry'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\batch_updates.move:5:31
+  [0m[36m│[0m
+[0m[36m5[0m [0m[36m│[0m use songsim::registry::{Self, [0m[33mTaskRegistry[0m};
+  [0m[36m│[0m                               [0m[33m^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'TaskRegistry'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+   [0m[36m┌─[0m .\sources\emergency.move:65:69
+   [0m[36m│[0m
+[0m[36m65[0m [0m[36m│[0m     events::emit_emergency_pause_activated(subsystem, *std::string::[0m[33mbytes[0m(&reason), paused_at);
+   [0m[36m│[0m                                                                     [0m[33m^^^^^[0m [0m[33mThe function 'std::string::bytes' is deprecated: Use `std::string::as_bytes` instead.[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\registry.move:8:23
+  [0m[36m│[0m
+[0m[36m8[0m [0m[36m│[0m use songsim::profile::[0m[33mUserProfile[0m;
+  [0m[36m│[0m                       [0m[33m^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'UserProfile'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\sources\registry.move:9:26
+  [0m[36m│[0m
+[0m[36m9[0m [0m[36m│[0m use songsim::reputation::[0m[33mReputation[0m;
+  [0m[36m│[0m                          [0m[33m^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'Reputation'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\sources\registry.move:10:23
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use songsim::quality::[0m[33mQualityTracker[0m;
+   [0m[36m│[0m                       [0m[33m^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'QualityTracker'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\tests\consensus_tests.move:4:32
+  [0m[36m│[0m
+[0m[36m4[0m [0m[36m│[0m use songsim::consensus::{Self, [0m[33mConsensusResult[0m, PayoutBatch};
+  [0m[36m│[0m                                [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'ConsensusResult'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\tests\consensus_tests.move:10:24
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use songsim::quality::{[0m[33mSelf[0m, QualityTracker};
+   [0m[36m│[0m                        [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'quality'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\tests\consensus_tests.move:10:30
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use songsim::quality::{Self, [0m[33mQualityTracker[0m};
+   [0m[36m│[0m                              [0m[33m^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'QualityTracker'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m 29[0m [0m[36m│[0m       fee_bps: u64, // Platform fee in basis points (1 bps = 0.01%)
+    [0m[36m│[0m                [0m[36m---[0m [0m[36mGiven: 'u64'[0m
+    [0m[36m·[0m  
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'accepted_labelers'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:50:24
+    [0m[36m│[0m
+[0m[36m 50[0m [0m[36m│[0m     accepted_labelers: vector<address>,
+    [0m[36m│[0m                        [0m[36m---------------[0m [0m[36mExpected: 'vector<address>'[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m307[0m [0m[36m│[0m       ctx: &mut TxContext,
+    [0m[36m│[0m                 [0m[36m---------[0m [0m[36mGiven: 'sui::tx_context::TxContext'[0m
+[0m[36m308[0m [0m[36m│[0m   ) {
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'quality_tracker'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:53:27
+    [0m[36m│[0m
+[0m[36m 53[0m [0m[36m│[0m     quality_tracker: &mut QualityTracker,
+    [0m[36m│[0m                           [0m[36m--------------[0m [0m[36mExpected: 'songsim::quality::QualityTracker'[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m302[0m [0m[36m│[0m       labeling_task: &mut Task,
+    [0m[36m│[0m                           [0m[36m----[0m [0m[36mGiven: 'songsim::task::Task'[0m
+    [0m[36m·[0m  
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'registry'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:46:20
+    [0m[36m│[0m
+[0m[36m 46[0m [0m[36m│[0m     registry: &mut TaskRegistry,
+    [0m[36m│[0m                    [0m[36m------------[0m [0m[36mExpected: 'songsim::registry::TaskRegistry'[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m306[0m [0m[36m│[0m       clock: &Clock,
+    [0m[36m│[0m              [0m[36m------[0m [0m[36mGiven: '&sui::clock::Clock'[0m
+    [0m[36m·[0m  
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'rejected_labelers'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:52:24
+    [0m[36m│[0m
+[0m[36m 52[0m [0m[36m│[0m     rejected_labelers: vector<address>,
+    [0m[36m│[0m                        [0m[36m---------------[0m [0m[36mExpected: 'vector<address>'[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m 30[0m [0m[36m│[0m       fee_recipient: address, // Address receiving platform fees
+    [0m[36m│[0m                      [0m[36m-------[0m [0m[36mGiven: 'address'[0m
+    [0m[36m·[0m  
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'rejected_submission_ids'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:51:30
+    [0m[36m│[0m
+[0m[36m 51[0m [0m[36m│[0m     rejected_submission_ids: vector<u64>,
+    [0m[36m│[0m                              [0m[36m-----------[0m [0m[36mExpected: 'vector<u64>'[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m304[0m [0m[36m│[0m       accepted_labelers: vector<address>,
+    [0m[36m│[0m                          [0m[36m---------------[0m [0m[36mGiven: 'vector<address>'[0m
+    [0m[36m·[0m  
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'requester_profile'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:48:24
+    [0m[36m│[0m
+[0m[36m 48[0m [0m[36m│[0m     requester_profile: &mut UserProfile,
+    [0m[36m│[0m                        [0m[36m----------------[0m [0m[36mExpected: '&mut songsim::profile::UserProfile'[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m  
+[0m[36m303[0m [0m[36m│[0m       accepted_submission_ids: vector<u64>,
+    [0m[36m│[0m                                [0m[36m-----------[0m [0m[36mGiven: 'vector<u64>'[0m
+    [0m[36m·[0m  
+[0m[36m309[0m [0m[36m│[0m       let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m────────────────────────────^[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. Invalid argument for parameter 'task'[0m
+    [0m[36m│[0m  
+    [0m[36m┌─[0m .\sources\consensus.move:47:11
+    [0m[36m│[0m
+[0m[36m 47[0m [0m[36m│[0m     task: &mut Task,
+    [0m[36m│[0m           [0m[36m---------[0m [0m[36mExpected: '&mut songsim::task::Task'[0m
+
+[0m[1m[38;5;9merror[E04016][0m[1m: too few arguments[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:309:28
+    [0m[36m│[0m    
+[0m[36m309[0m [0m[36m│[0m         let consensus_result = [0m[31mconsensus::finalize_consensus([0m
+    [0m[36m│[0m [0m[31m╭[0m[0m[31m──[0m[0m[31m────────────────────────────^[0m
+    [0m[36m│[0m [0m[31m│[0m [0m[36m╭[0m[0m[36m─────────────────────────────────────────────────────────'[0m
+[0m[36m310[0m [0m[36m│[0m [0m[31m│[0m [0m[36m│[0m [0m[31m        labeling_task,[0m
+[0m[36m311[0m [0m[36m│[0m [0m[31m│[0m [0m[36m│[0m [0m[31m        accepted_submission_ids,[0m
+[0m[36m312[0m [0m[36m│[0m [0m[31m│[0m [0m[36m│[0m [0m[31m        accepted_labelers,[0m
+    [0m[36m·[0m [0m[31m│[0m [0m[36m│[0m
+[0m[36m317[0m [0m[36m│[0m [0m[31m│[0m [0m[36m│[0m [0m[31m        ctx,[0m
+[0m[36m318[0m [0m[36m│[0m [0m[31m│[0m [0m[36m│[0m [0m[31m    )[0m;
+    [0m[36m│[0m [0m[31m╰[0m[0m[31m─[0m[0m[36m│[0m[0m[31m─────^ Invalid call of 'songsim::consensus::finalize_consensus'. The call expected 12 argument(s) but got 8[0m
+    [0m[36m│[0m   [0m[36m╰[0m[0m[36m─────' Found 8 argument(s) here[0m
+    [0m[36m│[0m    
+    [0m[36m┌─[0m .\sources\consensus.move:45:12
+    [0m[36m│[0m
+[0m[36m 45[0m [0m[36m│[0m public fun finalize_consensus(
+    [0m[36m│[0m            [0m[36m------------------[0m [0m[36mExpected 12 argument(s)[0m
+
+[0m[1m[38;5;9merror[E04007][0m[1m: incompatible types[0m
+    [0m[36m┌─[0m .\tests\consensus_tests.move:490:5
+    [0m[36m│[0m
+[0m[36m489[0m [0m[36m│[0m public fun get_profile_stats(user_profile: &UserProfile): (u64, u64) {
+    [0m[36m│[0m                                                           [0m[36m----------[0m [0m[36mExpected expression list of length 2: '(u64, u64)'[0m
+[0m[36m490[0m [0m[36m│[0m     [0m[31mprofile::get_stats(user_profile)[0m
+    [0m[36m│[0m     [0m[31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [0m[31mInvalid return expression[0m
+    [0m[36m│[0m
+    [0m[36m┌─[0m .\sources\profile.move:123:46
+    [0m[36m│[0m
+[0m[36m123[0m [0m[36m│[0m public fun get_stats(profile: &UserProfile): (u64, u64, u64, u64, u64, u64, u64) {
+    [0m[36m│[0m                                              [0m[36m-----------------------------------[0m [0m[36mGiven expression list of length 7: '(u64, u64, u64, u64, u64, u64, u64)'[0m
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\sources\songsim.move:20:26
+   [0m[36m│[0m
+[0m[36m20[0m [0m[36m│[0m use songsim::consensus::{[0m[33mConsensusResult[0m, PayoutBatch};
+   [0m[36m│[0m                          [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'ConsensusResult'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\tests\reputation_tests.move:4:32
+  [0m[36m│[0m
+[0m[36m4[0m [0m[36m│[0m use songsim::consensus::{Self, [0m[33mConsensusResult[0m, PayoutBatch};
+  [0m[36m│[0m                                [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'ConsensusResult'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\tests\reputation_tests.move:10:24
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use songsim::quality::{[0m[33mSelf[0m, QualityTracker};
+   [0m[36m│[0m                        [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'quality'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[36m┌─[0m .\tests\profile_tests.move:9:10
+  [0m[36m│[0m
+[0m[36m9[0m [0m[36m│[0m use sui::[0m[33mobject[0m;
+  [0m[36m│[0m          [0m[33m^^^^^^[0m [0m[33mUnnecessary alias 'object' for module 'sui::object'. This alias is provided by default[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\tests\profile_tests.move:11:14
+   [0m[36m│[0m
+[0m[36m11[0m [0m[36m│[0m use songsim::[0m[33mconstants[0m;
+   [0m[36m│[0m              [0m[33m^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'constants'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+    [0m[36m┌─[0m .\tests\profile_tests.move:100:20
+    [0m[36m│[0m
+[0m[36m100[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 8[0m)] // EProfileAlreadyExists
+    [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+    [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\tests\platform_tests.move:9:14
+  [0m[36m│[0m
+[0m[36m9[0m [0m[36m│[0m use songsim::[0m[33mconstants[0m;
+  [0m[36m│[0m              [0m[33m^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'constants'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+   [0m[36m┌─[0m .\tests\platform_tests.move:71:20
+   [0m[36m│[0m
+[0m[36m71[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 10[0m)] // EInvalidFeePercentage
+   [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^^[0m
+   [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+   [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+   [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+    [0m[36m┌─[0m .\tests\platform_tests.move:165:20
+    [0m[36m│[0m
+[0m[36m165[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 11[0m)] // EPlatformPaused
+    [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+    [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[36m┌─[0m .\tests\task_tests.move:8:33
+  [0m[36m│[0m
+[0m[36m8[0m [0m[36m│[0m use songsim::task::{Self, Task, [0m[33mSubmission[0m};
+  [0m[36m│[0m                                 [0m[33m^^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'Submission'. Consider removing it[0m
+  [0m[36m│[0m
+  [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+   [0m[36m┌─[0m .\tests\task_tests.move:10:10
+   [0m[36m│[0m
+[0m[36m10[0m [0m[36m│[0m use sui::[0m[33mobject[0m;
+   [0m[36m│[0m          [0m[33m^^^^^^[0m [0m[33mUnnecessary alias 'object' for module 'sui::object'. This alias is provided by default[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+   [0m[36m┌─[0m .\tests\task_tests.move:12:14
+   [0m[36m│[0m
+[0m[36m12[0m [0m[36m│[0m use songsim::[0m[33mconstants[0m;
+   [0m[36m│[0m              [0m[33m^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'constants'. Consider removing it[0m
+   [0m[36m│[0m
+   [0m[36m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+   [0m[36m┌─[0m .\tests\task_tests.move:91:20
+   [0m[36m│[0m
+[0m[36m91[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 15[0m)] // EInvalidDeadline
+   [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^^[0m
+   [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+   [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+   [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+    [0m[36m┌─[0m .\tests\task_tests.move:160:20
+    [0m[36m│[0m
+[0m[36m160[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 2[0m)] // EInsufficientBounty
+    [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+    [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+    [0m[36m┌─[0m .\tests\task_tests.move:320:20
+    [0m[36m│[0m
+[0m[36m320[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 15[0m)] // EInvalidDeadline
+    [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+    [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+
+[0m[1m[38;5;11mwarning[W10007][0m[1m: issue with attribute value[0m
+    [0m[36m┌─[0m .\tests\task_tests.move:465:20
+    [0m[36m│[0m
+[0m[36m465[0m [0m[36m│[0m #[expected_failure([0m[33mabort_code = 4[0m)] // EUnauthorized
+    [0m[36m│[0m                    [0m[33m^^^^^^^^^^^^^^[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36m│[0m
+    [0m[36m│[0m                    [0m[33m│[0m            [0m[36mReplace value with a constant from expected module or add 'location=...'[0m
+    [0m[36m│[0m                    [0m[33mWARNING: passes for an abort from any module[0m
+

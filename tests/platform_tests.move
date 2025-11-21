@@ -4,10 +4,12 @@ module songsim::platform_tests;
 use std::string;
 
 use songsim::songsim::{Self, AdminCap, PlatformConfig};
-use songsim::registry::TaskRegistry;
+use songsim::registry::{Self as registry, TaskRegistry};
+use songsim::profile::UserProfile;
 use songsim::test_helpers::{Self, begin_test, end_test};
 use songsim::constants;
 use sui::test_scenario as ts;
+use sui::object;
 
 // === Platform Initialization Tests ===
 
@@ -210,7 +212,8 @@ fun test_platform_paused_prevents_task_creation() {
     {
         let mut registry = ts::take_shared<TaskRegistry>(&scenario);
         let mut config = ts::take_shared<PlatformConfig>(&scenario);
-        let mut profile = ts::take_from_sender(&scenario);
+        let profile_addr = registry::get_profile_address(&registry, test_helpers::requester());
+        let mut profile = ts::take_shared_by_id<UserProfile>(&scenario, object::id_from_address(profile_addr));
         let bounty = test_helpers::mint_sui(test_helpers::bounty_amount(), ts::ctx(&mut scenario));
         let clock = test_helpers::create_clock(ts::ctx(&mut scenario));
 
@@ -232,7 +235,7 @@ fun test_platform_paused_prevents_task_creation() {
         );
 
         test_helpers::destroy_clock(clock);
-        ts::return_to_sender(&scenario, profile);
+        ts::return_shared(profile);
         ts::return_shared(registry);
         ts::return_shared(config);
     };
