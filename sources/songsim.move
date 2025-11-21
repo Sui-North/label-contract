@@ -486,13 +486,11 @@ public fun update_rejected_labeler(
 /// Update submission status after consensus (batch-friendly)
 public fun update_submission_after_consensus(
     submission: &mut Submission,
-    task: &Task,
     is_accepted: bool,
     clock: &Clock,
 ) {
     batch_updates::update_submission_after_consensus(
         submission,
-        task,
         is_accepted,
         clock::timestamp_ms(clock),
     );

@@ -63,11 +63,10 @@ public fun update_rejected_labeler(
 /// Update submission status after consensus (individual)
 public fun update_submission_after_consensus(
     submission: &mut Submission,
-    task: &Task,
     is_accepted: bool,
     current_time: u64,
 ) {
     // Update submission using internal function (no requester auth check)
-    task::update_submission_status_internal(submission, task, is_accepted, current_time);
+    task::update_submission_status_internal(submission, is_accepted, current_time);
 }
 

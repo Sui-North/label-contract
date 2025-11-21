@@ -296,12 +296,10 @@ public fun update_submission_status(
 /// Update submission status from consensus (no authorization check - package internal)
 public(package) fun update_submission_status_internal(
     submission: &mut Submission,
-    task: &Task,
     is_accepted: bool,
     reviewed_at: u64,
 ) {
-    assert!(submission.task_id == task.task_id, constants::e_task_not_found());
-    assert!(task.status == constants::status_completed(), constants::e_task_not_completed());
+    let old_status = submission.status;
 
     submission.status = if (is_accepted) {
         constants::submission_status_accepted()
@@ -314,7 +312,7 @@ public(package) fun update_submission_status_internal(
         submission.submission_id,
         submission.task_id,
         submission.labeler,
-        constants::submission_status_pending(),
+        old_status,
         submission.status,
         reviewed_at,
     );
