@@ -3,24 +3,23 @@
 /// This module coordinates all sub-modules and provides the public API
 module songsim::songsim;
 
-use std::string::String;
-use sui::clock::{Self, Clock};
-use sui::coin::{Self, Coin};
-use sui::sui::SUI;
+use songsim::batch_updates;
+use songsim::consensus::{Self, ConsensusResult, PayoutBatch};
 use songsim::constants;
-use songsim::consensus;
 use songsim::dispute::{Self, Dispute};
 use songsim::events;
+use songsim::migration::{Self, MigrationState};
 use songsim::prize_pool::{Self, PrizePool};
 use songsim::profile::{Self, UserProfile};
+use songsim::quality::{Self, QualityTracker};
 use songsim::registry::{Self, TaskRegistry};
 use songsim::reputation::{Self, Reputation};
 use songsim::staking::{Self, LabelerStake};
 use songsim::task::{Self, Task, Submission};
-use songsim::consensus::{ConsensusResult, PayoutBatch};
-use songsim::migration::{Self, MigrationState};
-use songsim::quality::{Self, QualityTracker};
-use songsim::batch_updates;
+use std::string::String;
+use sui::clock::{Self, Clock};
+use sui::coin::{Self, Coin};
+use sui::sui::SUI;
 
 // === Platform Core Structs ===
 
@@ -154,10 +153,7 @@ public fun complete_platform_migration(
 }
 
 /// Rollback failed migration
-public fun rollback_platform_migration(
-    _: &AdminCap,
-    migration_state: &mut MigrationState,
-) {
+public fun rollback_platform_migration(_: &AdminCap, migration_state: &mut MigrationState) {
     migration::rollback_migration(migration_state);
 }
 
@@ -207,6 +203,28 @@ public fun create_profile(
     transfer::public_share_object(user_reputation);
 }
 
+/// Update user profile information
+public fun update_profile(
+    user_profile: &mut UserProfile,
+    display_name: String,
+    bio: String,
+    avatar_url: String,
+    clock: &Clock,
+    ctx: &TxContext,
+) {
+    profile::update(user_profile, display_name, bio, avatar_url, ctx);
+}
+
+/// Update user type preference
+public fun update_user_type(
+    user_profile: &mut UserProfile,
+    new_user_type: u8,
+    clock: &Clock,
+    ctx: &TxContext,
+) {
+    profile::update_user_type(user_profile, new_user_type, ctx);
+}
+
 // === Task Management ===
 
 /// Create new labeling task (with quality tracker)
@@ -230,7 +248,7 @@ public fun create_task(
     assert!(profile::get_owner(user_profile) == ctx.sender(), constants::e_unauthorized());
 
     let bounty_amount = coin::value(&bounty);
-    
+
     // Validate task parameters
     task::validate_task_creation(
         &dataset_url,
@@ -243,7 +261,7 @@ public fun create_task(
 
     // Pre-allocate task ID to avoid race condition
     let task_id = registry::get_next_task_id(registry);
-    
+
     // Register task and get ID
     let created_at = clock::timestamp_ms(clock);
     let new_task = task::create(
@@ -261,15 +279,15 @@ public fun create_task(
         created_at,
         ctx,
     );
-    
+
     let task_addr = object::id_address(&new_task);
     registry::confirm_task_registration(registry, task_id, task_addr);
-    
+
     // NEW: Create quality tracker for this task
     let quality_tracker = quality::create_tracker(task_id, ctx);
     let tracker_addr = object::id_address(&quality_tracker);
     registry::register_quality_tracker(registry, task_id, tracker_addr);
-    
+
     // Update profile stats
     profile::increment_tasks_created(user_profile);
     config.total_tasks = config.total_tasks + 1;
@@ -294,7 +312,7 @@ public fun submit_labels(
     ctx: &mut TxContext,
 ) {
     assert!(profile::get_owner(user_profile) == ctx.sender(), constants::e_unauthorized());
-    
+
     // Validate submission
     let (_, _, _, _, status, _, _, _, deadline, _, _) = task::get_task_details(labeling_task);
     task::validate_submission(&result_url, status, deadline, clock);
@@ -302,7 +320,7 @@ public fun submit_labels(
     let submitted_at = clock::timestamp_ms(clock);
     let task_id = task::get_task_id(labeling_task);
     let task_created_at = task::get_created_at(labeling_task);
-    
+
     // Create submission
     let new_submission = task::create_submission(
         0, // Temporary, will be set by registry
@@ -314,14 +332,14 @@ public fun submit_labels(
         submitted_at,
         ctx,
     );
-    
+
     let submission_addr = object::id_address(&new_submission);
     let submission_id = registry::register_submission(registry, submission_addr);
 
     // Update task and profile (checks for duplicates internally)
     task::add_submission(labeling_task, submission_id, ctx.sender());
     profile::increment_submissions_count(user_profile);
-    
+
     // NEW: Record quality metrics
     let completion_time = submitted_at - task_created_at;
     quality::record_metrics(
@@ -347,18 +365,18 @@ entry fun cancel_task(
     ctx: &mut TxContext,
 ) {
     assert!(profile::get_owner(requester_profile) == ctx.sender(), constants::e_unauthorized());
-    
+
     let task_id = task::get_task_id(labeling_task);
     let old_status = task::get_status(labeling_task);
-    
+
     let refund_coin = task::cancel_task(labeling_task, clock, ctx);
-    
+
     // NEW: Mark task inactive in registry
     registry::mark_task_inactive(registry, task_id);
-    
+
     // NEW: Update profile stats
     profile::increment_tasks_cancelled(requester_profile);
-    
+
     // NEW: Emit status change event
     events::emit_task_status_changed(
         task_id,
@@ -366,12 +384,17 @@ entry fun cancel_task(
         constants::status_cancelled(),
         clock::timestamp_ms(clock),
     );
-    
+
     transfer::public_transfer(refund_coin, ctx.sender());
 }
 
 /// Extend task deadline (only by requester, for open/in-progress tasks)
-public fun extend_deadline(labeling_task: &mut Task, new_deadline: u64, clock: &Clock, ctx: &TxContext) {
+public fun extend_deadline(
+    labeling_task: &mut Task,
+    new_deadline: u64,
+    clock: &Clock,
+    ctx: &TxContext,
+) {
     task::extend_deadline(labeling_task, new_deadline, clock, ctx);
 }
 
@@ -511,21 +534,41 @@ entry fun batch_update_submissions_5(
 ) {
     let current_time = clock::timestamp_ms(clock);
     let len = vector::length(&acceptance_flags);
-    
+
     if (len > 0) {
-        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+        task::update_submission_status_internal(
+            s1,
+            *vector::borrow(&acceptance_flags, 0),
+            current_time,
+        );
     };
     if (len > 1) {
-        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+        task::update_submission_status_internal(
+            s2,
+            *vector::borrow(&acceptance_flags, 1),
+            current_time,
+        );
     };
     if (len > 2) {
-        task::update_submission_status_internal(s3, *vector::borrow(&acceptance_flags, 2), current_time);
+        task::update_submission_status_internal(
+            s3,
+            *vector::borrow(&acceptance_flags, 2),
+            current_time,
+        );
     };
     if (len > 3) {
-        task::update_submission_status_internal(s4, *vector::borrow(&acceptance_flags, 3), current_time);
+        task::update_submission_status_internal(
+            s4,
+            *vector::borrow(&acceptance_flags, 3),
+            current_time,
+        );
     };
     if (len > 4) {
-        task::update_submission_status_internal(s5, *vector::borrow(&acceptance_flags, 4), current_time);
+        task::update_submission_status_internal(
+            s5,
+            *vector::borrow(&acceptance_flags, 4),
+            current_time,
+        );
     };
 }
 
@@ -540,18 +583,34 @@ entry fun batch_update_submissions_4(
 ) {
     let current_time = clock::timestamp_ms(clock);
     let len = vector::length(&acceptance_flags);
-    
+
     if (len > 0) {
-        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+        task::update_submission_status_internal(
+            s1,
+            *vector::borrow(&acceptance_flags, 0),
+            current_time,
+        );
     };
     if (len > 1) {
-        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+        task::update_submission_status_internal(
+            s2,
+            *vector::borrow(&acceptance_flags, 1),
+            current_time,
+        );
     };
     if (len > 2) {
-        task::update_submission_status_internal(s3, *vector::borrow(&acceptance_flags, 2), current_time);
+        task::update_submission_status_internal(
+            s3,
+            *vector::borrow(&acceptance_flags, 2),
+            current_time,
+        );
     };
     if (len > 3) {
-        task::update_submission_status_internal(s4, *vector::borrow(&acceptance_flags, 3), current_time);
+        task::update_submission_status_internal(
+            s4,
+            *vector::borrow(&acceptance_flags, 3),
+            current_time,
+        );
     };
 }
 
@@ -565,15 +624,27 @@ entry fun batch_update_submissions_3(
 ) {
     let current_time = clock::timestamp_ms(clock);
     let len = vector::length(&acceptance_flags);
-    
+
     if (len > 0) {
-        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+        task::update_submission_status_internal(
+            s1,
+            *vector::borrow(&acceptance_flags, 0),
+            current_time,
+        );
     };
     if (len > 1) {
-        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+        task::update_submission_status_internal(
+            s2,
+            *vector::borrow(&acceptance_flags, 1),
+            current_time,
+        );
     };
     if (len > 2) {
-        task::update_submission_status_internal(s3, *vector::borrow(&acceptance_flags, 2), current_time);
+        task::update_submission_status_internal(
+            s3,
+            *vector::borrow(&acceptance_flags, 2),
+            current_time,
+        );
     };
 }
 
@@ -586,21 +657,25 @@ entry fun batch_update_submissions_2(
 ) {
     let current_time = clock::timestamp_ms(clock);
     let len = vector::length(&acceptance_flags);
-    
+
     if (len > 0) {
-        task::update_submission_status_internal(s1, *vector::borrow(&acceptance_flags, 0), current_time);
+        task::update_submission_status_internal(
+            s1,
+            *vector::borrow(&acceptance_flags, 0),
+            current_time,
+        );
     };
     if (len > 1) {
-        task::update_submission_status_internal(s2, *vector::borrow(&acceptance_flags, 1), current_time);
+        task::update_submission_status_internal(
+            s2,
+            *vector::borrow(&acceptance_flags, 1),
+            current_time,
+        );
     };
 }
 
 /// Batch update 1 submission
-entry fun batch_update_submissions_1(
-    s1: &mut Submission,
-    is_accepted: bool,
-    clock: &Clock,
-) {
+entry fun batch_update_submissions_1(s1: &mut Submission, is_accepted: bool, clock: &Clock) {
     let current_time = clock::timestamp_ms(clock);
     task::update_submission_status_internal(s1, is_accepted, current_time);
 }
@@ -643,7 +718,12 @@ public fun update_reputation_weighted(
     task_difficulty: u64,
     clock: &Clock,
 ) {
-    reputation::update_weighted(user_reputation, accepted, task_difficulty, clock::timestamp_ms(clock));
+    reputation::update_weighted(
+        user_reputation,
+        accepted,
+        task_difficulty,
+        clock::timestamp_ms(clock),
+    );
 }
 
 /// Apply reputation decay based on inactivity
@@ -662,13 +742,13 @@ public fun create_labeler_stake(
 ) {
     // Verify platform not paused
     assert!(!config.paused, constants::e_platform_paused());
-    
+
     // Verify minimum stake
     assert!(
-        coin::value(&stake_coin) >= constants::min_labeler_stake(), 
-        constants::e_insufficient_stake()
+        coin::value(&stake_coin) >= constants::min_labeler_stake(),
+        constants::e_insufficient_stake(),
     );
-    
+
     // Create stake through staking module
     let stake = staking::create_stake(
         ctx.sender(),
@@ -676,20 +756,16 @@ public fun create_labeler_stake(
         clock,
         ctx,
     );
-    
+
     // Transfer stake object to labeler
     transfer::public_transfer(stake, ctx.sender());
 }
 
 /// Withdraw stake after lock period
-public fun withdraw_labeler_stake(
-    stake: LabelerStake,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
+public fun withdraw_labeler_stake(stake: LabelerStake, clock: &Clock, ctx: &mut TxContext) {
     // Withdraw through staking module (checks lock period internally)
     let coins = staking::withdraw_stake(stake, clock, ctx);
-    
+
     // Transfer coins back to labeler
     transfer::public_transfer(coins, ctx.sender());
 }
@@ -775,7 +851,9 @@ public fun get_reputation_score(user_reputation: &Reputation): u64 {
     reputation::get_score(user_reputation)
 }
 
-public fun get_reputation_details(user_reputation: &Reputation): (address, u64, u64, u64, u64, u64, vector<u8>) {
+public fun get_reputation_details(
+    user_reputation: &Reputation,
+): (address, u64, u64, u64, u64, u64, vector<u8>) {
     reputation::get_details(user_reputation)
 }
 
@@ -784,7 +862,9 @@ public fun get_task_info(labeling_task: &Task): (u64, address, u64, u8, u64, u64
     task::get_task_info(labeling_task)
 }
 
-public fun get_task_details(labeling_task: &Task): (u64, address, u64, u64, u8, u64, u64, u64, u64, u64, u64) {
+public fun get_task_details(
+    labeling_task: &Task,
+): (u64, address, u64, u64, u8, u64, u64, u64, u64, u64, u64) {
     task::get_task_details(labeling_task)
 }
 
